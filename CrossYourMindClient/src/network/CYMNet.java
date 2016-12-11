@@ -161,6 +161,11 @@ public class CYMNet {
 		}
 	}
 	
+	/** 서버로 Protocol을 보내는 메소드 */
+	public void sendProtocol(Protocol pt){
+		
+	}
+	
 	/** 서버로 파일을 송신하는 메소드 */
 	public void sendFile(File sendFile, long fileSize) { 
 		try {

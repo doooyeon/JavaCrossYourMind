@@ -7,10 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -31,8 +28,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import home.HomePanel;
 import main.CYMFrame;
+import main.UserInfo;
 import network.CYMNet;
 import superPanel.ReceiveJPanel;
 
@@ -40,6 +37,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 	
 	private CYMNet cymNet;
 	private CYMFrame cymFrame;
+	private UserInfo userInfo;
 
 	// For inner panels
 	private JPanel northPanel, centerPanel;
@@ -75,6 +73,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 	public LobbyPanel(CYMFrame cymFrame) {
 		setLayout(null);
 		this.cymFrame = cymFrame;
+		userInfo = cymFrame.getUserInfo();
 		cymNet = cymFrame.getCYMNet();
 		
 		initCreateDialog();
@@ -222,8 +221,8 @@ public class LobbyPanel extends ReceiveJPanel  {
 			public void actionPerformed(ActionEvent e) {
 				if (lobbyChatTextField.getText().length() != 0) {
 					String msg = lobbyChatTextField.getText();
-					cymNet.sendMSG("/MSG;" + cymFrame.getMyChatImagePath() + ";" + cymFrame.getMyProfileImagePath() + ";"
-							+ cymFrame.getMyNickname() + ";" + cymFrame.getMyCharName() + ";" + cymFrame.getMyLevel()
+					cymNet.sendMSG("/MSG;" + userInfo.getMyChatImagePath() + ";" + userInfo.getMyProfileImagePath() + ";"
+							+ userInfo.getMyNickname() + ";" + userInfo.getMyCharName() + ";" + userInfo.getMyLevel()
 							+ ";" + msg);
 				}
 				lobbyChatTextField.setText("");
@@ -308,8 +307,8 @@ public class LobbyPanel extends ReceiveJPanel  {
 		String sendFileName = sendFile.getName(); // 이미지 파일 이름 받아오기
 		long sendFileSize = sendFile.length(); // 이미지 파일 크기 받아오기
 
-		cymNet.sendMSG(cmd + cymFrame.getMyChatImagePath() + ";" + cymFrame.getMyProfileImagePath() + ";"
-				+ cymFrame.getMyNickname() + ";" + cymFrame.getMyCharName() + ";" + cymFrame.getMyLevel() + ";"
+		cymNet.sendMSG(cmd + userInfo.getMyChatImagePath() + ";" + userInfo.getMyProfileImagePath() + ";"
+				+ userInfo.getMyNickname() + ";" + userInfo.getMyCharName() + ";" + userInfo.getMyLevel() + ";"
 				+ sendFileName + ";" + sendFileSize);
 
 		cymNet.sendFile(sendFile, sendFileSize);
@@ -319,7 +318,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 
 	public void myInfoUpdate() {
 		myInfo.removeAll();
-		myChar = new JLabel(new ImageIcon(this.cymFrame.getMyLobbyImagePath()));
+		myChar = new JLabel(new ImageIcon(this.userInfo.getMyLobbyImagePath()));
 		myChar.setBounds(5, 5, 100, 120);
 		myChar.setBackground(Color.red);
 		myChar.setOpaque(true);
@@ -335,7 +334,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 		myInfo.add(idLabel[0]);
 
 		idLabel[1].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 14));
-		idLabel[1].setText(this.cymFrame.getMyNickname());
+		idLabel[1].setText(this.userInfo.getMyNickname());
 		idLabel[1].setBounds(110, 20, 135, 20);
 		myInfo.add(idLabel[1]);
 
@@ -349,7 +348,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 		myInfo.add(charNameLabel[0]);
 
 		charNameLabel[1].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 14));
-		charNameLabel[1].setText(this.cymFrame.getMyCharName());
+		charNameLabel[1].setText(this.userInfo.getMyCharName());
 		charNameLabel[1].setBounds(110, 60, 135, 20);
 		myInfo.add(charNameLabel[1]);
 
@@ -363,7 +362,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 		myInfo.add(levelLabel[0]);
 
 		levelLabel[1].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 14));
-		levelLabel[1].setText(Integer.toString(this.cymFrame.getMyLevel()));
+		levelLabel[1].setText(Integer.toString(this.userInfo.getMyLevel()));
 		levelLabel[1].setBounds(110, 100, 135, 20);
 		myInfo.add(levelLabel[1]);
 
@@ -414,7 +413,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 		StyledDocument doc = ChattingPane.getStyledDocument();
 		SimpleAttributeSet style = getChatFontStyle();
 		
-		if (nickname.equals("[" + this.cymFrame.getMyNickname() + "]")) {
+		if (nickname.equals("[" + this.userInfo.getMyNickname() + "]")) {
 			StyleConstants.setAlignment(style, StyleConstants.ALIGN_RIGHT);
 			doc.setParagraphAttributes(offset, doc.getLength(), style, false);
 			chattingScroll.getVerticalScrollBar().setValue(chattingScroll.getVerticalScrollBar().getMaximum());

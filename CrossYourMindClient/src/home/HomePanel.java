@@ -19,6 +19,7 @@ import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
 import main.CYMFrame;
+import main.UserInfo;
 import network.CYMNet;
 import superPanel.ReceiveJPanel;
 
@@ -26,6 +27,7 @@ public class HomePanel extends ReceiveJPanel  {
 	
 	private CYMNet cymNet;
 	private CYMFrame cymFrame;
+	private UserInfo userInfo;
 	
 	// For inner panels
 	private JPanel northPanel, centerPanel, southPanel;
@@ -44,6 +46,7 @@ public class HomePanel extends ReceiveJPanel  {
 	public HomePanel(CYMFrame cymFrame) {
 		setLayout(null);
 		this.cymFrame = cymFrame;
+		userInfo = cymFrame.getUserInfo();
 		cymNet = cymFrame.getCYMNet();
 		CharcterImgPath = "";
 		initCharImages();
@@ -184,7 +187,7 @@ public class HomePanel extends ReceiveJPanel  {
 			//닉네임을 랜덤으로 세팅
 			int level = (int) (Math.random() * 30 + 1);
 			
-			cymFrame.setImagePath(CharcterImgPath);
+			userInfo.setImagePath(CharcterImgPath);
 			
 			logIn(id, characterNum, level);
 			
@@ -201,9 +204,9 @@ public class HomePanel extends ReceiveJPanel  {
 		String splitMsg[];
 		splitMsg = msg.split(";");
 		if (splitMsg[0].equals("/SUCCESSLOGIN")) {
-			cymFrame.setMyNickname(splitMsg[1]);
-			cymFrame.setMyCharName(Integer.parseInt(splitMsg[2]));
-			cymFrame.setMyLevel(Integer.parseInt(splitMsg[3]));
+			userInfo.setMyNickname(splitMsg[1]);
+			userInfo.setMyCharName(Integer.parseInt(splitMsg[2]));
+			userInfo.setMyLevel(Integer.parseInt(splitMsg[3]));
 			cymFrame.sequenceControl("lobbyPanel", Integer.parseInt(splitMsg[4]));
 		}
 	}
