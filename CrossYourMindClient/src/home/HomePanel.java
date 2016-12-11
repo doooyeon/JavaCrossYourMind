@@ -23,9 +23,11 @@ import network.CYMNet;
 import superPanel.ReceiveJPanel;
 
 public class HomePanel extends ReceiveJPanel  {
+	
 	private CYMNet cymNet;
 	private CYMFrame cymFrame;
 	
+	// For inner panels
 	private JPanel northPanel, centerPanel, southPanel;
 	private JLabel titleImage;
 	private JButton[] CH;
@@ -179,6 +181,7 @@ public class HomePanel extends ReceiveJPanel  {
 				return;
 			}
 			
+			//닉네임을 랜덤으로 세팅
 			int level = (int) (Math.random() * 30 + 1);
 			
 			cymFrame.setImagePath(CharcterImgPath);

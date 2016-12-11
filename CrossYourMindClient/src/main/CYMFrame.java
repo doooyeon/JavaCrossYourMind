@@ -10,7 +10,6 @@ import javax.swing.JFrame;
 
 import home.HomePanel;
 import lobby.LobbyPanel;
-import main.CYMFrame.ExitListener;
 import network.CYMNet;
 import room.RoomPanel;
 
@@ -19,7 +18,10 @@ public class CYMFrame extends JFrame {
 	public static final String ImagePath = "res/";
 	public static final String FONT = "12롯데마트드림Light";
 
+	//for connection
 	private CYMNet cymNet;
+	
+	//for panel
 	private CardLayout layoutManager;
 	private Container contentPane;
 
@@ -27,26 +29,27 @@ public class CYMFrame extends JFrame {
 	public LobbyPanel lobbyPanel;
 	public RoomPanel roomPanel;
 	
+	//for images
+	private String [] charName = {"Spiderman", "Batman", "Captain America", "Shrek", "Ironman"};
 	private ArrayList<String> entrycharImageList;
 	private ArrayList<String> entryEnteredcharImageList;
 	private ArrayList<String> lobbyImageList;
 	private ArrayList<String> talkcharImageList;
 	private ArrayList<String> profileImageList;
 	private ArrayList<String> gamecharImageList;
-	private String [] charName = {"Spiderman", "Batman", "Captain America", "Shrek", "Ironman"};
 	
+	//for userInfo
 	private String myNickname;
-	private String myLobbyImagePath; // seleced charNum
 	private int myLevel;
 	private String myCharName;
-	
-	private String imagePath;
-	private String lobbyImagePath;
-	private String chatImagePath;
-	private String profileImagePath;
-	private String gameCharImagePath;
+	private String myImagePath;
+	private String myLobbyImagePath;
+	private String myChatImagePath;
+	private String myProfileImagePath;
+	private String myGameCharImagePath;
 
 	public CYMFrame() {
+		setTitle("Cross Your Mind");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		layoutManager = new CardLayout();
 		setLayout(layoutManager);
@@ -55,15 +58,16 @@ public class CYMFrame extends JFrame {
 		initCharImageList();
 		addWindowListener(new ExitListener());
 		
-		cymNet = new CYMNet();
+		cymNet = new CYMNet(); //서버와의 연결과 데이터 송수신을 위한 객체
+		
 		homePanel = new HomePanel(this);
 		lobbyPanel = new LobbyPanel(this);
 		//roomPanel = new RoomPanel(this);
 		cymNet.setHomePanel(homePanel);
 		cymNet.setLobbyPanel(lobbyPanel);
 		cymNet.setRoomPanel(roomPanel);
-		cymNet.toHomePanel();
-		cymNet.network();
+		cymNet.toHomePanel(); //시작은 HomePanel
+		cymNet.network(); //서버에 접속
 
 		contentPane = this.getContentPane();
 		contentPane.add("homePanel", homePanel);
@@ -73,7 +77,27 @@ public class CYMFrame extends JFrame {
 		setVisible(true);
 		sequenceControl("homePanel", 0);
 	}
+	
+	/** 사용할 이미지 리스트에 대한 초기화 메소드 */
+	private void initCharImageList() {
+		entrycharImageList = new ArrayList<String>();
+		entryEnteredcharImageList = new ArrayList<String>();
+		lobbyImageList = new ArrayList<String>();
+		talkcharImageList = new ArrayList<String>();
+		profileImageList  = new ArrayList<String>();
+		gamecharImageList = new ArrayList<String>();
+		
+		for (int i = 0; i < 5; i++) {
+			entrycharImageList.add(ImagePath + "Char" + i + ".png");
+			entryEnteredcharImageList.add(ImagePath + "Char" + i + "E.png");
+			lobbyImageList.add(ImagePath + "Char" + i + "L.png");
+			talkcharImageList.add(ImagePath + "Char" + i + "T.png");
+			profileImageList.add(ImagePath + "Char" + i + "F.png");
+			gamecharImageList.add(ImagePath + "Char" + i + "H.png");
+		}
+	}
 
+	/** 패널을 바꾸는 메소드 */
 	public void sequenceControl(String panelName, int arg0) {
 		// arg0는 패널마다 의미하는 바가 다름
 		switch (panelName) {
@@ -100,6 +124,7 @@ public class CYMFrame extends JFrame {
 		}
 	}
 
+	/** cardLayout으로 패널 전환 및 keyFocus 가져오기 */
 	public void changePanel(String panelName) {
 		layoutManager.show(contentPane, panelName);
 		switch (panelName) {
@@ -109,127 +134,88 @@ public class CYMFrame extends JFrame {
 		case "lobbyPanel":
 			lobbyPanel.requestFocus();
 			break;
-		case "roomPanel":
+		case "gamePanel":
 			roomPanel.requestFocus();
 			break;
 		}
 	}
-	
-	public void setMyLobbyImagePath(String item) {
-		myLobbyImagePath = item;
-	}
 
+	/* setter for userInfo */
 	public void setMyNickname(String item) {
 		this.myNickname = item;
 	}
-
 	public void setMyLevel(int item) {
 		this.myLevel = item;
 	}
-
 	public void setMyCharName(int index) {
 		this.myCharName = charName[index];
 	}
-	
-	public void setImagePath(String item) {
-		System.out.println("<ProgressInfo> set_imagePath imagePath: " + item);
-		imagePath = item;
-		String frontImagePath = seperateImagePath(item);
-		lobbyImagePath = frontImagePath + "L.png";
-		chatImagePath = frontImagePath + "T.png";
-		profileImagePath = frontImagePath + "F.png";
-		gameCharImagePath = frontImagePath + "H.png";
-
-	}
-	
 	public String seperateImagePath(String imagePath) {
-		System.out.println("<ProgressInfo> imageFilename " + imagePath);
 		String frontImagePath = imagePath.substring(0, imagePath.length() - 4);
-		System.out.println("<ProgressInfo> frontImagePath " + frontImagePath);
+		System.out.println("<CYMFrame> frontImagePath " + frontImagePath);
 		return frontImagePath;
 	}
+	public void setImagePath(String item) {
+		System.out.println("<ProgressInfo> set_imagePath imagePath: " + item);
+		myImagePath = item;
+		String frontImagePath = seperateImagePath(item);
+		myLobbyImagePath = frontImagePath + "L.png";
+		myChatImagePath = frontImagePath + "T.png";
+		myProfileImagePath = frontImagePath + "F.png";
+		myGameCharImagePath = frontImagePath + "H.png";
 
+	}
+	
 	public CYMNet getCYMNet() {
 		return this.cymNet;
 	}
 	
-	private void initCharImageList() {
-		entrycharImageList = new ArrayList<String>();
-		entryEnteredcharImageList = new ArrayList<String>();
-		lobbyImageList = new ArrayList<String>();
-		talkcharImageList = new ArrayList<String>();
-		profileImageList  = new ArrayList<String>();
-		gamecharImageList = new ArrayList<String>();
-		for (int i = 0; i < 5; i++) {
-			entrycharImageList.add(ImagePath + "Char" + i + ".png");
-			entryEnteredcharImageList.add(ImagePath + "Char" + i + "E.png");
-			lobbyImageList.add(ImagePath + "Char" + i + "L.png");
-			talkcharImageList.add(ImagePath + "Char" + i + "T.png");
-			profileImageList.add(ImagePath + "Char" + i + "F.png");
-			gamecharImageList.add(ImagePath + "Char" + i + "H.png");
-		}
-	}
-	
+	/* getter for ImageList */
 	public ArrayList<String> getCharImageList() {
 		return entrycharImageList;
 	}
-
 	public ArrayList<String> getCharEnteredImageList() {
 		return entryEnteredcharImageList;
 	}
-	
 	public ArrayList<String> getLobbyImageList() {
 		return lobbyImageList;
 	}
-
 	public ArrayList<String> getTalkcharImageList() {
 		return talkcharImageList;
 	}
-	
 	public ArrayList<String> getProfileImageList() {
 		return profileImageList;
 	}
-	
 	public ArrayList<String> getGamecharImageList() {
 		return gamecharImageList;
 	}
-	
+	/* getter for userInfo */
 	public String getMyNickname() {
 		return myNickname;
 	}
-
-	public String getMyLobbyImagePath() {
-		return myLobbyImagePath;
-	}
-
 	public int getMyLevel() {
 		return myLevel;
 	}
-
 	public String getMyCharName() {
 		return myCharName;
 	}
-	
-	public String getImagePath() {
-		return imagePath;
+	public String getMyImagePath() {
+		return myImagePath;
 	}
-
-	public String getLobbyImagePath() {
-		return lobbyImagePath;
+	public String getMyLobbyImagePath() {
+		return myLobbyImagePath;
 	}
-
-	public String getChatImagePath() {
-		return chatImagePath;
+	public String getMyChatImagePath() {
+		return myChatImagePath;
 	}
-	
-	public String getProfileImagePath() {
-		return profileImagePath;
+	public String getMyProfileImagePath() {
+		return myProfileImagePath;
 	}
-
-	public String getGameCharImagePath() {
-		return gameCharImagePath;
+	public String getMyGameCharImagePath() {
+		return myGameCharImagePath;
 	}
 	
+	/** 윈도우 창 닫기에 대한 이벤트 처리 클래스 */
 	class ExitListener implements WindowListener {
 		@Override
 		public void windowClosing(WindowEvent e) {

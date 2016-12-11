@@ -19,7 +19,9 @@ public class ClientManager extends Thread {
 	private static enum NETSTATE {
 		Home, Lobby, Room
 	};
+	private String receiveFilePath = "C:/Program Files/CrossYourMindServer";
 	
+	//for connection
 	private Server server;
 	private InputStream is;
 	private OutputStream os;
@@ -29,14 +31,13 @@ public class ClientManager extends Thread {
 	private FileOutputStream fos;
 	private ObjectOutputStream oos;
 	private Socket user_socket;
+	
 	private Room room = null;
 	private Vector<ClientManager> users;
 	private int playerNo;
-	private NETSTATE netState = NETSTATE.Home;
-	
-	private String receiveFilePath = "C:/Program Files/CrossYourMindServer";
-	
 	private String userID;
+	
+	private NETSTATE netState = NETSTATE.Home;
 
 	public String getUserID() {
 		return userID;

@@ -222,7 +222,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 			public void actionPerformed(ActionEvent e) {
 				if (lobbyChatTextField.getText().length() != 0) {
 					String msg = lobbyChatTextField.getText();
-					cymNet.sendMSG("/MSG;" + cymFrame.getChatImagePath() + ";" + cymFrame.getProfileImagePath() + ";"
+					cymNet.sendMSG("/MSG;" + cymFrame.getMyChatImagePath() + ";" + cymFrame.getMyProfileImagePath() + ";"
 							+ cymFrame.getMyNickname() + ";" + cymFrame.getMyCharName() + ";" + cymFrame.getMyLevel()
 							+ ";" + msg);
 				}
@@ -308,7 +308,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 		String sendFileName = sendFile.getName(); // 이미지 파일 이름 받아오기
 		long sendFileSize = sendFile.length(); // 이미지 파일 크기 받아오기
 
-		cymNet.sendMSG(cmd + cymFrame.getChatImagePath() + ";" + cymFrame.getProfileImagePath() + ";"
+		cymNet.sendMSG(cmd + cymFrame.getMyChatImagePath() + ";" + cymFrame.getMyProfileImagePath() + ";"
 				+ cymFrame.getMyNickname() + ";" + cymFrame.getMyCharName() + ";" + cymFrame.getMyLevel() + ";"
 				+ sendFileName + ";" + sendFileSize);
 
@@ -319,7 +319,7 @@ public class LobbyPanel extends ReceiveJPanel  {
 
 	public void myInfoUpdate() {
 		myInfo.removeAll();
-		myChar = new JLabel(new ImageIcon(this.cymFrame.getLobbyImagePath()));
+		myChar = new JLabel(new ImageIcon(this.cymFrame.getMyLobbyImagePath()));
 		myChar.setBounds(5, 5, 100, 120);
 		myChar.setBackground(Color.red);
 		myChar.setOpaque(true);

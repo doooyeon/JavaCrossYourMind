@@ -16,23 +16,28 @@ import javax.swing.border.EmptyBorder;
 
 public class Server extends JFrame {
 	private static final int PORT = 30000;
+	
+	// for GUI
 	private JPanel contentPane;
 	private JButton startBtn; // 서버를 실행시킨 버튼
 	JTextArea textArea; // 클라이언트 및 서버 메시지 출력
 
-	int playerCnt = 0;
+	// for connection
 	private ServerSocket socket; // 서버소켓
 	private Socket soc; // 연결소켓
 	
-	Vector<Room> rooms  = new Vector<Room>(); // 연결된 사용자를 저장할 벡터;
-	Vector<ClientManager> users = new Vector<ClientManager>(); // 연결된 사용자를 저장할 벡터
+	// for entered users
+	int playerCnt = 0;
+	Vector<Room> rooms  = new Vector<Room>(); // 연결된 방들을 저장할 벡터
+	Vector<ClientManager> users = new Vector<ClientManager>(); // 연결된 사용자들을 저장할 벡터
 
-	
+	/** SERVR construction */
 	public Server() {
 		init();
 	}
 
-	private void init() { // GUI를 구성하는 메소드
+	/** GUI를 구성하는 메소드 */
+	private void init() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 280, 400);
 		contentPane = new JPanel();
@@ -57,7 +62,8 @@ public class Server extends JFrame {
 		textArea.setEditable(false); // textArea를 사용자가 수정 못하게끔 막는다.
 	}
 	
-	class Myaction implements ActionListener { // 내부클래스로 액션 이벤트 처리 클래스
+	/** SERVER socket을 여는 액션 이벤트 처리하는 내부 클래스 */
+	class Myaction implements ActionListener { 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// 액션 이벤트가 sendBtn일때 또는 textField 에세 Enter key 치면
@@ -65,14 +71,8 @@ public class Server extends JFrame {
 				server_start();
 		}
 	}
-	
-	void addRoom(Room room) {
-		this.rooms.add(room);
-	}
-	void addUserToRoom(ClientManager clientManager, int roomIdx) {	
-		rooms.get(roomIdx).addUser(clientManager);
-	}
-	
+		
+	/** 서버가 소켓을 여는 메소드 */
 	private void server_start() {
 		try {
 			socket = new ServerSocket(PORT); // 서버가 포트 여는부분
@@ -84,11 +84,10 @@ public class Server extends JFrame {
 			}
 		} catch (IOException e) {
 			textArea.append("소켓이 이미 사용중입니다...\n");
-
 		}
-
 	}
 
+	/** 사용자 접속을 받도록하는 메소드 */
 	private void Connection() {
 		Thread th = new Thread(new Runnable() { // 사용자 접속을 받을 스레드
 			@Override
@@ -97,7 +96,7 @@ public class Server extends JFrame {
 					try {
 						textArea.append("사용자 접속 대기중...\n");
 						soc = socket.accept(); // accept가 일어나기 전까지는 무한 대기중
-						playerCnt++;
+						playerCnt++; //접속자 수를 증가시킨다.
 						textArea.append("사용자 접속!!\n");
 						ClientManager user = new ClientManager(soc, users, playerCnt, Server.this);
 						users.add(user); // 해당 벡터에 사용자 객체를 추가
@@ -110,6 +109,13 @@ public class Server extends JFrame {
 		});
 		th.start();
 	}
+	
+//	void addRoom(Room room) {
+//		this.rooms.add(room);
+//	}
+//	void addUserToRoom(ClientManager clientManager, int roomIdx) {	
+//		rooms.get(roomIdx).addUser(clientManager);
+//	}
 
 	public static void main(String[] args) {
 		Server frame = new Server();

@@ -26,10 +26,11 @@ public class CYMNet {
 		Home, Lobby, Room, Game
 	};
 
-	// TCP
+	// for TCP
 	private static final int PORT = 30000;
 	private static final String IP = "127.0.0.1";
 
+	// for connection
 	private Socket socket; // 연결소켓
 	private InputStream is;
 	private OutputStream os;
@@ -40,57 +41,55 @@ public class CYMNet {
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 
-	// GUI
+	// for GUI
 	private ReceiveJPanel panel; // 메세지를 받을 패널
 	private HomePanel homePanel;
 	private LobbyPanel lobbyPanel;
 	private RoomPanel roomPanel;
 
 	// GAME INFO
-	private int playerNo;
 	private NETSTATE netState = NETSTATE.Home;
 
-	public CYMNet() { // 생성자
+	/** CYMNet construction */
+	public CYMNet() { // 
 	}
 
+	/* set State */
 	public void setStateToHome() {
 		netState = NETSTATE.Home;
 	}
-
 	public void setStateToLobby() {
 		netState = NETSTATE.Lobby;
 	}
-
 	public void setStateToRoom() {
 		netState = NETSTATE.Room;
 	}
 
+	/* set Panel */
 	public void setHomePanel(HomePanel homePanel) {
 		this.homePanel = homePanel;
 	}
-
 	public void setLobbyPanel(LobbyPanel lobbyPanel) {
 		this.lobbyPanel = lobbyPanel;
 	}
-	
 	public void setRoomPanel(RoomPanel roomPanel) {
 		this.roomPanel = roomPanel;
 	}
 
+	/* change Panel */
 	public void toHomePanel() {
 		this.panel = this.homePanel;
 	}
-
 	public void toLobbyPanel() {
 		this.panel = this.lobbyPanel;
 	}
-
 	public void toRoomPanel() {
 		this.panel = this.roomPanel;
 	}
-
+	
+	/** TCP IP 서버에 접속 */
 	public void network() {
-		// TCP IP 서버에 접속
+		
 		try {
 			socket = new Socket(IP, PORT);
 			if (socket != null) {// socket이 null값이 아닐때 즉! 연결되었을때
@@ -103,21 +102,20 @@ public class CYMNet {
 			System.exit(0);
 		}
 	}
-
-	public void Connection() { // 실직 적인 메소드 연결부분
+	
+	/** 실질적인 메소드 연결부분 */
+	public void Connection() { 
 		try { // 스트림 설정
 			is = socket.getInputStream();
 			dis = new DataInputStream(is);
 			os = socket.getOutputStream();
 			dos = new DataOutputStream(os);
-
-			// playerNo = dis.readInt();
-			// System.out.println(playerNo);
 		} catch (IOException e) {
 			System.out.println("스트림 설정 에러!!");
 		}
 
-		Thread th = new Thread(new Runnable() { // 스레드를 돌려서 서버로부터 메세지를 수신
+		// 스레드를 돌려서 서버로부터 메세지를 수신
+		Thread th = new Thread(new Runnable() { 
 			@Override
 			public void run() {
 				while (true) {
@@ -145,18 +143,16 @@ public class CYMNet {
 							break;
 						}
 						break;
-						
 					case Room:
-						
 					}
 				} // while문 끝
-
 			}// run메소드 끝
 		});
 		th.start();
 	}
 
-	public void sendMSG(String str) { // 서버로 메세지를 보내는 메소드
+	/** 서버로 메세지를 송신하는 메소드 */
+	public void sendMSG(String str) { 
 		try {
 			dos.writeUTF(str);
 		} catch (IOException e) {
@@ -165,7 +161,8 @@ public class CYMNet {
 		}
 	}
 	
-	public void sendFile(File sendFile, long fileSize) { // 서버로 파일을 보내는 메소드
+	/** 서버로 파일을 송신하는 메소드 */
+	public void sendFile(File sendFile, long fileSize) { 
 		try {
 			int byteSize = 10000;
 			byte[] sendFileTobyteArray = new byte[byteSize]; // 바이트 배열 생성
@@ -174,6 +171,8 @@ public class CYMNet {
 
 			int n = 0;
 			int count = 0;
+			
+			//파일의 크기만큼만 보낸다.
 			while (count < fileSize) {
 				n = fis.read(sendFileTobyteArray);
 				dos.write(sendFileTobyteArray, 0, n);
@@ -187,6 +186,7 @@ public class CYMNet {
 		}
 	}
 	
+	/** 원본, 리사이징 이미지를 수신하는 메소드 */
 	public ImageIcon [] receiveImageIcon() {
 		ImageIcon [] receiveImage = null;
 		receiveImage = new ImageIcon[2];
@@ -204,6 +204,7 @@ public class CYMNet {
 		return receiveImage;
 	}
 	
+	/** 서버로부터 파일을 수신하는 메소드 */
 	public void receiveFile(String receiveFilePath, String receiveFileName, int receiveFileSize) {
 		int byteSize = 10000;
 		byte[] ReceiveByteArrayToFile = new byte[byteSize];
@@ -213,6 +214,8 @@ public class CYMNet {
 			
 			int n = 0;
 			int count = 0;
+			
+			//파일의 크기만큼만 수신한다.
 			while (count < receiveFileSize) {
 				n = dis.read(ReceiveByteArrayToFile);
 				fos.write(ReceiveByteArrayToFile, 0, n);
@@ -225,14 +228,5 @@ public class CYMNet {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	public int getPlayerNum() {
-		return playerNo;
-	}
-
-	public void setPlayerNum(int playerNum) {
-		this.playerNo = playerNum;
-	}
-	
+	}	
 }
