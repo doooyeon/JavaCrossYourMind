@@ -40,7 +40,7 @@ public class CYMNet {
 	private FileOutputStream fos;
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
-	
+
 	private Object readObject; // 수신할 Protocol Object
 	private Thread th;
 
@@ -54,16 +54,18 @@ public class CYMNet {
 	private NETSTATE netState = NETSTATE.Home;
 
 	/** CYMNet construction */
-	public CYMNet() { // 
+	public CYMNet() { //
 	}
 
 	/* set State */
 	public void setStateToHome() {
 		netState = NETSTATE.Home;
 	}
+
 	public void setStateToLobby() {
 		netState = NETSTATE.Lobby;
 	}
+
 	public void setStateToRoom() {
 		netState = NETSTATE.Room;
 	}
@@ -72,9 +74,11 @@ public class CYMNet {
 	public void setHomePanel(HomePanel homePanel) {
 		this.homePanel = homePanel;
 	}
+
 	public void setLobbyPanel(LobbyPanel lobbyPanel) {
 		this.lobbyPanel = lobbyPanel;
 	}
+
 	public void setRoomPanel(RoomPanel roomPanel) {
 		this.roomPanel = roomPanel;
 	}
@@ -83,16 +87,18 @@ public class CYMNet {
 	public void toHomePanel() {
 		this.panel = this.homePanel;
 	}
+
 	public void toLobbyPanel() {
 		this.panel = this.lobbyPanel;
 	}
+
 	public void toRoomPanel() {
 		this.panel = this.roomPanel;
 	}
-	
+
 	/** TCP IP 서버에 접속 */
 	public void network() {
-		
+
 		try {
 			socket = new Socket(IP, PORT);
 			if (socket != null) {// socket이 null값이 아닐때 즉! 연결되었을때
@@ -105,139 +111,95 @@ public class CYMNet {
 			System.exit(0);
 		}
 	}
-	
+
 	/** 실질적인 메소드 연결부분 */
-	public void Connection() { 
+	public void Connection() {
 		try { // 스트림 설정
 			os = socket.getOutputStream();
 			is = socket.getInputStream();
 			dos = new DataOutputStream(os);
 			dis = new DataInputStream(is);
 			oos = new ObjectOutputStream(os);
-			//ois = new ObjectInputStream(is);
+			// ois = new ObjectInputStream(is);
 		} catch (IOException e) {
 			System.out.println("스트림 설정 에러!!");
 		}
 
 		receiveProtocol();
 	}
-	
+
 	/** 서버로부터 Protocol을 수신받는 스레드 */
-	public void receiveProtocol(){
-		// 스레드를 돌려서 서버로부터 메세지를 수신
-				th = new Thread(new Runnable() { 
-//					@Override
-//					public void run() {
-//						while (true) {
-//							switch (netState) {
-//							case Home:
-//							case Lobby:
-//								try {
-//									String msg = dis.readUTF();
-//									msg = msg.trim();
-//									panel.receiveMSG(msg);
-//									// 받은 메세지 처리
-//								} catch (IOException e) {
-//									System.out.println("메세지 수신 에러!!");
-//									// 서버와 소켓 통신에 문제가 생겼을 경우 소켓을 닫는다
-//									try {
-//										os.close();
-//										is.close();
-//										dos.close();
-//										dis.close();
-//										socket.close();
-//										break; // 에러 발생하면 while문 종료
-//									} catch (IOException e1) {
-//									}
-//									break;
-//								}
-//								break;
-//							case Room:
-//							}
-//						} // while문 끝
-//					}// run메소드 끝
-					
-					@Override
-					public void run() {
-						while (true) {
-							System.out.println("<CYMNet> run netState: " + netState);
-							switch (netState) {
-							case Home:
-								System.out.println("<CYMNet> Home 들어옴");
-							case Lobby:
-								System.out.println("<CYMNet> Lobby 들어옴");
-								try {
-									System.out.println("ois -> 1111");
-									ois = new ObjectInputStream(is);
-									System.out.println("ois -> 2222 넘어오라고오오오오오오");
-									readObject = ois.readObject();
-									System.out.println("ois -> 3333");
-									
-									Protocol pt = (Protocol) readObject;
-									System.out.println("<CYMNet> before receiveProtocol");
-									panel.receiveProtocol(pt);// 각 패널에서 받은 메세지 처리
-									System.out.println("<CYMNet> after receiveProtocol");
-								}
-								catch (IOException e) {
-									System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(IOException)");
-									// 서버와 소켓 통신에 문제가 생겼을 경우 소켓을 닫는다
-									try {
-										os.close();
-										is.close();
-										dos.close();
-										dis.close();
-										socket.close();
-										break; // 에러 발생하면 while문 종료
-									} catch (IOException e1) {
-									}
-									break;
-								} catch (ClassNotFoundException e) {
-									System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassNotFoundException)");
-									e.printStackTrace();
-									break;
-								} catch (ClassCastException e) {
-									System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassCastException)");
-									e.printStackTrace();
-									break;
-								} catch (NullPointerException e) {
-									System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(NullPointerException)");
-									e.printStackTrace();
-									break;
-								}
-							case Room:
-								System.out.println("<CYMNet> Room 들어옴");
+	public void receiveProtocol() {
+		// 스레드를 돌려서 서버로부터 프로토콜을 수신
+		th = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					switch (netState) {
+					case Home:
+						System.out.println("<CYMNet> Enter Home");
+					case Lobby:
+						System.out.println("<CYMNet> Enter Lobby");
+						try {
+							System.out.println("ois -> 1111");
+							ois = new ObjectInputStream(is);
+							System.out.println("ois -> 2222");
+							readObject = ois.readObject();
+							System.out.println("ois -> 3333");
+
+							Protocol pt = (Protocol) readObject;
+							panel.receiveProtocol(pt);// 각 패널에서 받은 메세지 처리
+						} catch (IOException e) {
+							System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(IOException)");
+							// 서버와 소켓 통신에 문제가 생겼을 경우 소켓을 닫는다
+							try {
+								os.close();
+								is.close();
+								dos.close();
+								dis.close();
+								oos.close();
+								ois.close();
+								socket.close();
+								break; // 에러 발생하면 while문 종료
+							} catch (IOException e1) {
 							}
-						} // while문 끝
-					}// run메소드 끝
-				});//thread 정의 끝
-				System.out.println("<CYMNet> Run 시작");
-				th.start();
-				System.out.println("<CYMNet> Run 끝");
+							break;
+						} catch (ClassNotFoundException e) {
+							System.out
+									.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassNotFoundException)");
+							e.printStackTrace();
+							break;
+						} catch (ClassCastException e) {
+							System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassCastException)");
+							e.printStackTrace();
+							break;
+						} catch (NullPointerException e) {
+							System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(NullPointerException)");
+							e.printStackTrace();
+							break;
+						}
+					case Room:
+						System.out.println("<CYMNet> Room 들어옴");
+					}
+				} // while문 끝
+			}// run메소드 끝
+		});// thread 정의 끝
+		th.start();
 	}
 
-	/** 서버로 메세지를 송신하는 메소드 */
-//	public void sendMSG(String str) { 
-//		try {
-//			dos.writeUTF(str);
-//		} catch (IOException e) {
-//			System.out.println("메세지 송신 에러!!");
-//			return;
-//		}
-//	}
-	
 	/** 서버로 Protocol을 송신하는 메소드 */
-	public void sendProtocol(Protocol pt){
-		try{
+	public void sendProtocol(Protocol pt) {
+		try {
 			oos.writeObject(pt);
 			oos.flush();
-		} catch(Exception e){
+		} catch (Exception e) {
 			System.out.println("Protocol 송신 에러!!");
 			e.printStackTrace();
 		}
 	}
-	
+
 	/** 서버로 파일을 송신하는 메소드 */
-	public void sendFile(File sendFile, long fileSize) { 
+	public void sendFile(File sendFile, long fileSize) {
 		try {
 			int byteSize = 10000;
 			byte[] sendFileTobyteArray = new byte[byteSize]; // 바이트 배열 생성
@@ -246,8 +208,8 @@ public class CYMNet {
 
 			int n = 0;
 			int count = 0;
-			
-			//파일의 크기만큼만 보낸다.
+
+			// 파일의 크기만큼만 보낸다.
 			while (count < fileSize) {
 				n = fis.read(sendFileTobyteArray);
 				dos.write(sendFileTobyteArray, 0, n);
@@ -260,26 +222,7 @@ public class CYMNet {
 			return;
 		}
 	}
-	
-	/** 원본, 리사이징 이미지를 수신하는 메소드 */
-	public ImageIcon [] receiveImageIcon() {
-		ImageIcon [] receiveImage = null;
-		receiveImage = new ImageIcon[2];
 
-		try {
-			ois = new ObjectInputStream(is);
-			
-			receiveImage[0] = (ImageIcon) ois.readObject();
-			receiveImage[1] = (ImageIcon) ois.readObject();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		return receiveImage;
-	}
-	
 	/** 서버로부터 파일을 수신하는 메소드 */
 	public void receiveFile(String receiveFilePath, String receiveFileName, int receiveFileSize) {
 		int byteSize = 10000;
@@ -287,29 +230,41 @@ public class CYMNet {
 
 		try {
 			fos = new FileOutputStream(receiveFilePath + "/" + receiveFileName);
-			
+
 			int n = 0;
 			int count = 0;
-			
-			//파일의 크기만큼만 수신한다.
+
+			// 파일의 크기만큼만 수신한다.
 			while (count < receiveFileSize) {
 				n = dis.read(ReceiveByteArrayToFile);
 				fos.write(ReceiveByteArrayToFile, 0, n);
 				count += n;
 			}
-			
+
 			fos.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}	
+	}
+
+	/** 서버로부터 원본, 리사이징 이미지를 수신하는 메소드 */
+	public ImageIcon[] receiveImageIcon() {
+		ImageIcon[] receiveImage = null;
+		receiveImage = new ImageIcon[2];
+
+		try {
+			ois = new ObjectInputStream(is);
+
+			receiveImage[0] = (ImageIcon) ois.readObject();
+			receiveImage[1] = (ImageIcon) ois.readObject();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return receiveImage;
+	}
 }
-
-
-
-
-
-
-

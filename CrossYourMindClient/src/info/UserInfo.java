@@ -32,25 +32,28 @@ public class UserInfo implements Serializable{
 
 	/* setter for userInfo */
 	public void setMyNickname(String item) {
+		System.out.println("<UserInfo> setMyNickname: " + item);
 		this.myNickname = item;
 	}
 
 	public void setMyLevel(int item) {
+		System.out.println("<UserInfo> setMyLevel: " + item);
 		this.myLevel = item;
 	}
 
 	public void setMyCharName(int index) {
 		this.myCharName = charName[index];
+		System.out.println("<UserInfo> setMyCharName: " + myCharName);
 	}
 
 	public String seperateImagePath(String imagePath) {
 		String frontImagePath = imagePath.substring(0, imagePath.length() - 4);
-		System.out.println("<UserInfo> frontImagePath " + frontImagePath);
+		System.out.println("<UserInfo> seperateImagePath: " + frontImagePath);
 		return frontImagePath;
 	}
 
 	public void setImagePath(String item) {
-		System.out.println("<UserInfo> setImagePath imagePath: " + item);
+		System.out.println("<UserInfo> setImagePath: " + item);
 		myImagePath = item;
 		String frontImagePath = seperateImagePath(item);
 		myLobbyImagePath = frontImagePath + "L.png";
@@ -62,34 +65,42 @@ public class UserInfo implements Serializable{
 
 	/* getter for userInfo */
 	public String getMyNickname() {
+		System.out.println("<UserInfo> getMyNickname: " + myNickname);
 		return myNickname;
 	}
 
 	public int getMyLevel() {
+		System.out.println("<UserInfo> getMyLevel: " + myLevel);
 		return myLevel;
 	}
 
 	public String getMyCharName() {
+		System.out.println("<UserInfo> getMyCharName: " + myCharName);
 		return myCharName;
 	}
 
 	public String getMyImagePath() {
+		System.out.println("<UserInfo> getMyImagePath: " + myImagePath);
 		return myImagePath;
 	}
 
 	public String getMyLobbyImagePath() {
+		System.out.println("<UserInfo> getMyLobbyImagePath: " + myLobbyImagePath);
 		return myLobbyImagePath;
 	}
 
 	public String getMyChatImagePath() {
+		System.out.println("<UserInfo> getMyChatImagePath: " + myChatImagePath);
 		return myChatImagePath;
 	}
 
 	public String getMyProfileImagePath() {
+		System.out.println("<UserInfo> getMyProfileImagePath: " + myProfileImagePath);
 		return myProfileImagePath;
 	}
 
 	public String getMyGameCharImagePath() {
+		System.out.println("<UserInfo> getMyGameCharImagePath: " + myGameCharImagePath);
 		return myGameCharImagePath;
 	}
 
