@@ -18,9 +18,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.border.LineBorder;
 
+import info.UserInfo;
 import main.CYMFrame;
-import main.UserInfo;
 import network.CYMNet;
+import network.Protocol;
 import superPanel.ReceiveJPanel;
 
 public class HomePanel extends ReceiveJPanel  {
@@ -40,20 +41,22 @@ public class HomePanel extends ReceiveJPanel  {
 	
 	ConnectAction connectActionListener = new ConnectAction();
 	
-	private String CharcterImgPath;
-	private int characterNum;
+	private String selectedCharImgPath;
+	private int selectedCharNum;
 	
+	/** HomePanel construction */
 	public HomePanel(CYMFrame cymFrame) {
 		setLayout(null);
 		this.cymFrame = cymFrame;
 		userInfo = cymFrame.getUserInfo();
 		cymNet = cymFrame.getCYMNet();
-		CharcterImgPath = "";
-		initCharImages();
+		selectedCharImgPath = "";
+		initCharStrArray();
 		setPanel();
 		setEvent();
 	}
 
+	/** for GUI */
 	private void setPanel() {
 		this.setLayout(new BorderLayout());
 
@@ -71,7 +74,7 @@ public class HomePanel extends ReceiveJPanel  {
 		centerPanel = new JPanel(new FlowLayout());
 		centerPanel.setPreferredSize(new Dimension(800, 400));
 		centerPanel.setBackground(Color.gray);
-		initCH();
+		initCharBtn();
 		this.add(BorderLayout.CENTER, centerPanel);
 
 		// For south panel
@@ -92,6 +95,7 @@ public class HomePanel extends ReceiveJPanel  {
 		this.add(BorderLayout.SOUTH, southPanel);
 	}
 
+	/** for Charter Button Event */
 	private void setEvent() {
 		CH[0].addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -123,7 +127,8 @@ public class HomePanel extends ReceiveJPanel  {
 		enterButton.addActionListener(connectActionListener);
 	}
 
-	private void initCH() {
+	/** 캐릭터 버튼 이미지 초기화 */
+	private void initCharBtn() {
 		CH = new JButton[5];
 		for (int i = 0; i < 5; i++) {
 			CH[i] = new JButton(charImages.get(i));
@@ -133,7 +138,8 @@ public class HomePanel extends ReceiveJPanel  {
 		}
 	}
 
-	private void initCharImages() {
+	/** 캐릭터 String Array 초기화 */
+	private void initCharStrArray() {
 		ArrayList<String> imagePath = new ArrayList<String>();
 		ArrayList<String> imagePathBtnPressed = new ArrayList<String>();
 
@@ -147,13 +153,13 @@ public class HomePanel extends ReceiveJPanel  {
 		}
 	}
 
+	/** 선택된 이미지 번호와 경로 설정 */
 	private void selectMaster(int selected) {
 		for (int i = 0; i < 5; i++) {
 			if (i == selected) {
 				CH[i].setIcon(charPressedImages.get(i));
-				characterNum = i;
-				CharcterImgPath = cymFrame.getCharImageList().get(i);
-
+				selectedCharImgPath = cymFrame.getCharImageList().get(i);
+				selectedCharNum = i;
 			} else
 				CH[i].setIcon(charImages.get(i));
 		}
@@ -171,12 +177,18 @@ public class HomePanel extends ReceiveJPanel  {
 	// }
 
 	
+	/** 로그인 이벤트에 대한 내부 클래스  -> 서버로 프로토콜 전송  */
 	class ConnectAction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent event) {
+			//TextField에서 닉네임 세팅
 			String id = nickNameTextField.getText().trim(); // 공백이 있지 모르니 공백 제거 trim() 사용
 			
-			if(CharcterImgPath == "") {
+			//레벨을 랜덤으로 세팅
+			int level = (int) (Math.random() * 30 + 1);
+			
+			//입력 내용 확인
+			if(selectedCharImgPath == "") {
 				JOptionPane.showMessageDialog(HomePanel.this.cymFrame.getContentPane(), "Please select a character.");
 				return;
 			} else if (id.equals("")) {
@@ -184,30 +196,58 @@ public class HomePanel extends ReceiveJPanel  {
 				return;
 			}
 			
-			//닉네임을 랜덤으로 세팅
-			int level = (int) (Math.random() * 30 + 1);
+			//userInfo 세팅
+			userInfo.setMyNickname(id);
+			userInfo.setMyLevel(level);
+			userInfo.setMyCharName(selectedCharNum);
+			userInfo.setImagePath(selectedCharImgPath);
 			
-			userInfo.setImagePath(CharcterImgPath);
-			
-			logIn(id, characterNum, level);
+			//프로토콜 전송
+			Protocol pt = new Protocol();
+			pt.setStatus(Protocol.LOGIN);
+			pt.setUserInfo(userInfo);
+			//logIn(id, selectedCharNum, level);
+			logIn(pt);
 			
 			nickNameTextField.setText("");
 		}
 	}
 	
-	public void logIn(String id, int charNum, int level) {
-		cymNet.sendMSG("/LOGIN;" + id + ";" + charNum + ";" + level);
+	/** LOGIN 프로토콜 전송 */
+//	public void logIn(String id, int charNum, int level) {
+//		cymNet.sendMSG("/LOGIN;" + id + ";" + charNum + ";" + level);
+//	}
+	public void logIn(Protocol pt) {
+		System.out.println("<HomePanel> logIn: " + pt.getUserInfo().getMyNickname());
+		cymNet.sendProtocol(pt);
 	}
 	
 	@Override
 	public void receiveMSG(String msg) {
-		String splitMsg[];
-		splitMsg = msg.split(";");
-		if (splitMsg[0].equals("/SUCCESSLOGIN")) {
-			userInfo.setMyNickname(splitMsg[1]);
-			userInfo.setMyCharName(Integer.parseInt(splitMsg[2]));
-			userInfo.setMyLevel(Integer.parseInt(splitMsg[3]));
-			cymFrame.sequenceControl("lobbyPanel", Integer.parseInt(splitMsg[4]));
+		System.out.println("<HomePanel> receiveMSG: 내용 없음");
+//		String splitMsg[];
+//		splitMsg = msg.split(";");
+//		if (splitMsg[0].equals("/SUCCESSLOGIN")) {
+//			userInfo.setMyNickname(splitMsg[1]);
+//			userInfo.setMyCharName(Integer.parseInt(splitMsg[2]));
+//			userInfo.setMyLevel(Integer.parseInt(splitMsg[3]));
+//			cymFrame.sequenceControl("lobbyPanel", Integer.parseInt(splitMsg[4]));
+//		}
+	}
+	
+	@Override
+	public void receiveProtocol(Protocol pt){
+		System.out.println("<HomePanel> in receiveProtocol");
+		
+		//String status = Integer.toString(pt.getStatus());
+		int status = pt.getStatus();
+		System.out.println("<HomePanel> status: " + status);
+		if(status == Protocol.SUCCESSLOGIN){
+			userInfo = pt.getUserInfo();
+			//cymFrame.sequenceControl("lobbyPanel", arg0);
+			System.out.println("<HomePanel> ???");
+			cymFrame.sequenceControl("lobbyPanel", 0);
+			System.out.println("<HomePanel> !!!");
 		}
 	}
 }

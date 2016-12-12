@@ -1,17 +1,20 @@
+package info;
 import java.util.Vector;
 
-public class Room {
+import main.ClientManager;
+
+public class RoomInfo {
 	private Vector<ClientManager> users;
 
-	public Room() {
+	public RoomInfo() {
 		users = new Vector<ClientManager>();
 	}
 
 	/** user가 Room에 참여 */
-	void addUser(ClientManager user) {
+	public void addUser(ClientManager user) {
 		users.add(user);
 		user.setRoom(this);
-		user.changeUsers(users);
+		user.updateAllClientManager(users);
 	}
 
 	/** Room에 참여하고 있는 User들의 Vector */

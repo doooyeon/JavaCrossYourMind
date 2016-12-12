@@ -1,6 +1,8 @@
-package main;
+package info;
 
-public class UserInfo {
+import java.io.Serializable;
+
+public class UserInfo implements Serializable{
 	// for userInfo
 	private String[] charName = { "Spiderman", "Batman", "Captain America", "Shrek", "Ironman" };
 	private String myNickname;
@@ -11,6 +13,22 @@ public class UserInfo {
 	private String myChatImagePath;
 	private String myProfileImagePath;
 	private String myGameCharImagePath;
+
+	public UserInfo() {
+		initField();
+	}
+
+	/** 필드의 값을 모두 초기화 */
+	public void initField() {
+		myNickname = null;
+		myLevel = 0;
+		myCharName = null;
+		myImagePath = null;
+		myLobbyImagePath = null;
+		myChatImagePath = null;
+		myProfileImagePath = null;
+		myGameCharImagePath = null;
+	}
 
 	/* setter for userInfo */
 	public void setMyNickname(String item) {
@@ -27,12 +45,12 @@ public class UserInfo {
 
 	public String seperateImagePath(String imagePath) {
 		String frontImagePath = imagePath.substring(0, imagePath.length() - 4);
-		System.out.println("<CYMFrame> frontImagePath " + frontImagePath);
+		System.out.println("<UserInfo> frontImagePath " + frontImagePath);
 		return frontImagePath;
 	}
 
 	public void setImagePath(String item) {
-		System.out.println("<CYMFrame> setImagePath imagePath: " + item);
+		System.out.println("<UserInfo> setImagePath imagePath: " + item);
 		myImagePath = item;
 		String frontImagePath = seperateImagePath(item);
 		myLobbyImagePath = frontImagePath + "L.png";

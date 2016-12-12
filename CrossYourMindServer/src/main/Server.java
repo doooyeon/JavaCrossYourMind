@@ -1,3 +1,4 @@
+package main;
 // Java Chatting Server
 
 import java.awt.event.ActionEvent;
@@ -14,6 +15,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
 
+import info.RoomInfo;
+
 public class Server extends JFrame {
 	private static final int PORT = 30000;
 	
@@ -28,7 +31,7 @@ public class Server extends JFrame {
 	
 	// for entered users
 	int playerCnt = 0;
-	Vector<Room> rooms  = new Vector<Room>(); // 연결된 방들을 저장할 벡터
+	Vector<RoomInfo> rooms  = new Vector<RoomInfo>(); // 연결된 방들을 저장할 벡터
 	Vector<ClientManager> users = new Vector<ClientManager>(); // 연결된 사용자들을 저장할 벡터
 
 	/** SERVR construction */
