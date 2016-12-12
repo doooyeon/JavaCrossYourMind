@@ -1,6 +1,7 @@
 package network;
 
 import java.io.Serializable;
+import java.util.Vector;
 
 import info.UserInfo;
 
@@ -15,6 +16,8 @@ public class Protocol implements Serializable {
 	public static final int FILE = 203;
 	public static final int FILESEND = 204;
 	public static final int FILESAVE = 205;
+	public static final int UPDATE_GAME_LIST = 206;
+	public static final int UPDATE_USER_LIST = 207;
 
 	// in gamePanel
 
@@ -33,9 +36,12 @@ public class Protocol implements Serializable {
 
 	// for chatting
 	private String lobbyChatSentence;
+	private Vector<String> gameList;
+	private Vector<String> userList;
 
 	// for roominfo
 	private int roomSize;
+	private Vector<UserInfo> usersInRoom;
 
 	/** Protocol construction */
 	public Protocol() {
@@ -79,6 +85,26 @@ public class Protocol implements Serializable {
 		return roomSize;
 	}
 
+	public Vector<String> getGameList() {
+		System.out.print("<Protocol> getGameList: ");
+		for (int i = 0; i < gameList.size(); i++) {
+			System.out.print(gameList.get(i) + " | ");
+		}
+		System.out.println();
+
+		return gameList;
+	}
+
+	public Vector<String> getUserList() {
+		System.out.print("<Protocol> getUserList: ");
+		for (int i = 0; i < userList.size(); i++) {
+			System.out.print(userList.get(i) + " | ");
+		}
+		System.out.println();
+
+		return userList;
+	}
+
 	/* setter */
 	public void setStatus(int status) {
 		System.out.println("<Protocol> setStatus: " + status);
@@ -108,6 +134,24 @@ public class Protocol implements Serializable {
 	public void setRoomSize(int roomSize) {
 		System.out.println("<Protocol> setRoomSize: " + roomSize);
 		this.roomSize = roomSize;
+	}
+
+	public void setGameList(Vector<String> gameList) {
+		System.out.print("<Protocol> setGameList: ");
+		for (int i = 0; i < gameList.size(); i++) {
+			System.out.print(gameList.get(i) + " | ");
+		}
+		System.out.println();
+		this.gameList = gameList;
+	}
+
+	public void setUserList(Vector<String> userList) {
+		System.out.print("<Protocol> setUserList: ");
+		for (int i = 0; i < userList.size(); i++) {
+			System.out.print(userList.get(i) + " | ");
+		}
+		System.out.println();
+		this.userList = userList;
 	}
 
 }

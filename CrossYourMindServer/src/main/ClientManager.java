@@ -1,5 +1,6 @@
 package main;
- import java.awt.Image;
+
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -15,7 +16,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Vector;
 
-
 import javax.swing.ImageIcon;
 
 import info.RoomInfo;
@@ -25,9 +25,10 @@ public class ClientManager extends Thread {
 	private static enum NETSTATE {
 		Home, Lobby, Room
 	};
+
 	private String receiveFilePath = "C:/Program Files/CrossYourMindServer";
-	
-	//for connection
+
+	// for connection
 	private Server server;
 	private InputStream is;
 	private OutputStream os;
@@ -38,36 +39,19 @@ public class ClientManager extends Thread {
 	private ObjectOutputStream oos;
 	private ObjectInputStream ois;
 	private Socket user_socket;
-	
+
+	// for network userinfo
 	private RoomInfo room = null;
+
 	private Vector<ClientManager> users;
 	private int playerNo;
+
+	// for private userinfo
 	private String userID;
-	
 	private NETSTATE netState = NETSTATE.Home;
 	private Object readObject;
 
-	public String getUserID() {
-		return userID;
-	}
-
-	public void setRoom(RoomInfo room) {
-		this.room = room;
-	}
-
-	public void setNetState(NETSTATE netState) {
-		this.netState = netState;
-	}
-
-	NETSTATE getNetState() {
-		return this.netState;
-	}
-
-	public void updateAllClientManager(Vector<ClientManager> users) {
-		this.users = users;
-	}
-
-	
+	/** ClientManager Construction */
 	public ClientManager(Socket soc, Vector<ClientManager> vc, int playerNo, Server server) { // 생성자메소드
 		// 매개변수로 넘어온 자료 저장
 		this.server = server;
@@ -77,8 +61,9 @@ public class ClientManager extends Thread {
 
 		UserNetwork();
 	}
-	
-	void UserNetwork() {
+
+	/** 스트림 생성 메소드 */
+	public void UserNetwork() {
 		try {
 			is = user_socket.getInputStream();
 			dis = new DataInputStream(is);
@@ -94,81 +79,20 @@ public class ClientManager extends Thread {
 		}
 	}
 
-	
-//	void userExitInRoom() {
-//		try {
-//			dos.close();
-//			dis.close();
-//			user_socket.close();
-//			if (users.size() == 1) {
-//				if (server.users.size() != 0) {
-//					server.users.get(0).broadCastMsg("/RMROOM " + server.rooms.indexOf(room) + 1);
-//				}
-//				server.rooms.removeElement(room);
-//			}
-//			users.removeElement(this); // 에러가난 현재 객체를 벡터에서 지운다
-//			if(users.size()!=0) {
-//				users.get(0).broadCastMsg("/RMROOM " + playerNo);
-//			}
-//			server.textArea.append("현재 벡터에 담겨진 사용자 수 : " + users.size() + "\n");
-//			server.textArea.append("사용자 접속 끊어짐 자원 반납\n");
-//			server.textArea.setCaretPosition(server.textArea.getText().length());
-//			server.playerCnt--;
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
-	
-//	void broadCast(String str) {
-//		for (int i = 0; i < users.size(); i++) {
-//			ClientManager imsi = users.elementAt(i);
-//			imsi.sendString(str);
-//		}
-//	}
-/** 채팅 메세지 broadCasting*/
-	void broadCastMSG(Protocol pt) {
-		String msg = pt.getLobbyCharSentence();
-	for (int i = 0; i < users.size(); i++) {
-		
-		ClientManager imsi = users.elementAt(i);
-		if(imsi.getNetState() == NETSTATE.Lobby){
-			imsi.sendProtocol(pt);
-			//imsi.sendString(str);
-		}
-		
-	}
-}
-	
-//	public void sendString(String str) {
-//		try {
-//			dos.writeUTF(str);
-//		} 
-//		catch (IOException e) {
-//			server.textArea.append("메시지 송신 에러 발생\n");	
-//			server.textArea.setCaretPosition(server.textArea.getText().length());
-//		}
-//	}
+	/** Protocol 클라이언트로 Protocol을 송신하는 메소드 */
 	public void sendProtocol(Protocol pt) {
-	try {
-		oos = new ObjectOutputStream(os);
-		
-		oos.writeObject(pt);
-		oos.flush();
-	} 
-	catch (IOException e) {
-		server.textArea.append("메시지 송신 에러 발생\n");	
-		server.textArea.setCaretPosition(server.textArea.getText().length());
-	}
-}
-	
-	void broadCastImage(String str) {
-		for (int i = 0; i < users.size(); i++) {
-			ClientManager imsi = users.elementAt(i);
-			imsi.sendImage(str);
+		try {
+			oos = new ObjectOutputStream(os);
+
+			oos.writeObject(pt);
+			oos.flush();
+		} catch (IOException e) {
+			server.textArea.append("메시지 송신 에러 발생\n");
+			server.textArea.setCaretPosition(server.textArea.getText().length());
 		}
 	}
-	
+
+	/** IMAGE 클라이언트로 원본과 리사이징 이미지를 송신하는 메소드 */
 	public void sendImage(String fineName) {
 		Image originalImage = Toolkit.getDefaultToolkit().getImage(receiveFilePath + "/" + fineName); // ImageIcon
 		ImageIcon originalImageIcon = new ImageIcon(originalImage);
@@ -185,25 +109,26 @@ public class ClientManager extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
-	public void receiveFile(String fileName, int fileSize) {
+
+	/** FILE 클라이언트로부터 파일을 수신하는 메소드 */
+	public void receiveFile(String fileName, long fileSize) {
 		int byteSize = 10000;
 		byte[] ReceiveByteArrayToFile = new byte[byteSize];
-		
-		String saveFolder =  receiveFilePath;  //경로        
-        File targetDir = new File(saveFolder);  
-        
-        if(!targetDir.exists()) { //디렉토리 없으면 생성.
-         targetDir.mkdirs();
-        }
-		
+
+		String saveFolder = receiveFilePath; // 경로
+		File targetDir = new File(saveFolder);
+
+		if (!targetDir.exists()) { // 디렉토리 없으면 생성.
+			targetDir.mkdirs();
+		}
+
 		try {
 			fos = new FileOutputStream(receiveFilePath + "/" + fileName);
 			int n = 0;
 			int count = 0;
-			while (count < fileSize) { 
+			while (count < fileSize) {
 				n = dis.read(ReceiveByteArrayToFile);
-				fos.write(ReceiveByteArrayToFile, 0, n); 
+				fos.write(ReceiveByteArrayToFile, 0, n);
 				count += n;
 			}
 			fos.close();
@@ -213,8 +138,9 @@ public class ClientManager extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
-	public void sendFile(File sendFile, int fileSize) {
+
+	/** FILE 클라이언트로 파일을 송신하는 메소드 */
+	public void sendFile(File sendFile, long fileSize) {
 		int byteSize = 10000;
 		byte[] sendFileTobyteArray = new byte[byteSize]; // 바이트 배열 생성
 		try {
@@ -233,78 +159,62 @@ public class ClientManager extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
+	/** Protocol을 수신하여 처리하는 메소드 -> Thread */
+	@Override
 	public void run() {
 		while (true) {
 			try {
 				readObject = ois.readObject();
 				Protocol pt = (Protocol) readObject;
 
-				Protocol ptSendToClient = new Protocol();
-				
+				// Protocol ptSendToClient = new Protocol();
 
 				server.textArea.append("프로토콜 수신 번호 : " + pt.getStatus() + "\n");
 				switch (pt.getStatus()) {
 
 				case Protocol.LOGIN:
-//					ptSendToClient.setStatus(Protocol.SUCCESSLOGIN);
-//					ptSendToClient.setUserInfo(pt.getUserInfo());
-//					ptSendToClient.setRoomSize(server.rooms.size());
-//					sendProtocol(ptSendToClient);
-//					System.out.println("<ClientManager> after writeObject");
-//					netState = NETSTATE.Lobby;
-//					userID = pt.getUserInfo().getMyNickname();
-					//sendString(userID + "님 환영합니다."); // 연결된 사용자에게
-					
 					pt.setStatus(Protocol.SUCCESSLOGIN);
-					pt.setRoomSize(server.rooms.size());
+					pt.setRoomSize(server.rooms.size()); // 만들어져 있는 방의 개수 세팅
 					sendProtocol(pt);
-					System.out.println("<ClientManager> after writeObject");
+					System.out.println("<ClientManager> send SUCCESSLOGIN");
 					netState = NETSTATE.Lobby;
 					userID = pt.getUserInfo().getMyNickname();
+					
+					updateGameListInLobby(); // GameList업데이트
+					updateUserListInLobby(); // UserList업데이트
+					
 					break;
-
-				 case Protocol.MSG:
-				 //broadCastMSG(ptSendToClient);
-					 broadCastMSG(pt);
-				 
-				//
-				// case Lobby:
-				// if (splitMsg[0].equals("/MSG")) {
-				// broadCast("/MSG;" + splitMsg[1] + ";" + splitMsg[2] + ";" +
-				// splitMsg[3] + ";" + splitMsg[4] + ";"
-				// + splitMsg[5] + ";" + splitMsg[6]);
-				// }
-				// else if(splitMsg[0].equals("/IMAGE")) {
-				// receiveFile(splitMsg[6], Integer.parseInt(splitMsg[7]));
-				// broadCast("/IMAGE;" + splitMsg[1] + ";" + splitMsg[2] + ";" +
-				// splitMsg[3] + ";"
-				// + splitMsg[4] + ";" + splitMsg[5] + ";" + splitMsg[6]);
-				// broadCastImage(splitMsg[6]);
-				// }
-				// else if(splitMsg[0].equals("/FILE")) {
-				// receiveFile(splitMsg[6], Integer.parseInt(splitMsg[7]));
-				// broadCast("/FILE;" + splitMsg[1] + ";" + splitMsg[2] + ";" +
-				// splitMsg[3] + ";"
-				// + splitMsg[4] + ";" + splitMsg[5] + ";" + splitMsg[6]);
-				// }
-				// else if (splitMsg[0].equals("/FILESAVE")) {
-				// File sendFile = new File(receiveFilePath + "/" +
-				// splitMsg[1]); // 파일 생성
-				// int fileSize = (int) sendFile.length(); // 파일 크기 받아오기
-				// broadCast("/FILESEND;" + splitMsg[1] + ";" + fileSize);
-				// sendFile(sendFile, fileSize);
-				// }
-				// else if (splitMsg[0].equals("/LOGOUT")) {
-				// System.out.println("로그아웃!");
-				// netState = NETSTATE.Home;
-				// }
-				// break;
-				//
-				// case Room:
-				// break;
-				// }
-
+				case Protocol.MSG:
+					broadCastProtocol(pt);
+					break;
+				case Protocol.IMAGE:
+					receiveFile(pt.getSendFileName(), pt.getSendFileSize());
+					broadCastProtocol(pt);
+					broadCastImage(pt.getSendFileName());
+					break;
+				case Protocol.FILE:
+					receiveFile(pt.getSendFileName(), pt.getSendFileSize());
+					broadCastProtocol(pt);
+					break;
+				case Protocol.FILESAVE:
+					File sendFile = new File(receiveFilePath + "/" + pt.getSendFileName()); // 파일
+																							// 생성
+					long fileSize = (int) sendFile.length(); // 파일 크기 받아오기
+					pt.setStatus(Protocol.FILESEND);
+					pt.setSendFileSize(fileSize);
+					sendProtocol(pt);
+					sendFile(sendFile, fileSize);
+					break;
+					// else if (splitMsg[0].equals("/LOGOUT")) {
+					// System.out.println("로그아웃!");
+					// netState = NETSTATE.Home;
+					// }
+					// break;
+					//
+					// case Room:
+					// break;
+					// }
 				}
 			} catch (IOException e) {
 				try {
@@ -330,82 +240,134 @@ public class ClientManager extends Thread {
 			}
 		}
 	}
-}
-	
-//	public void run() { // 메세지 받아서 처리하는 쓰레드
-//		while (true) {
-//			String msg = "";
-//			String splitMsg[];
-//			try {
-//				msg = dis.readUTF();
-//			} catch (IOException e) {
-//				try {
-//					if (netState == NETSTATE.Room) {
-//						//userExitInRoom();
-//					}
-//					else {
-//						dos.close();
-//						dis.close();
-//						user_socket.close();
-//						users.removeElement(this); // 에러가난 현재 객체를 벡터에서 지운다
-//						server.textArea.append("현재 벡터에 담겨진 사용자 수 : " + users.size() + "\n");
-//						server.textArea.append("사용자 접속 끊어짐 자원 반납\n");
-//						server.textArea.setCaretPosition(server.textArea.getText().length());
-//						server.playerCnt--;
-//					}
-//					return;
-//				} catch (Exception ee) {
-//
-//				} // catch문 끝
-//			} // 바깥 catch문끝'
-//			msg = msg.trim();
-//			splitMsg = msg.split(";");
-//			if (splitMsg.length < 1)
-//				return;
-//			server.textArea.append("메세지 받음 : " + msg + "\n");
-//			switch (netState) {
-//			case Home:
-//				if (splitMsg[0].equals("/LOGIN")) {
-//					sendString("/SUCCESSLOGIN;" + splitMsg[1] + ";" + splitMsg[2] + ";" + splitMsg[3] + ";"
-//							+ server.rooms.size());
-//					netState = NETSTATE.Lobby;
-//					userID = splitMsg[1];
-//					sendString(splitMsg[1] + "님 환영합니다."); // 연결된 사용자에게
-//				}
-//				break;
-//			case Lobby:
-//				if (splitMsg[0].equals("/MSG")) {
-//					broadCast("/MSG;" + splitMsg[1] + ";" + splitMsg[2] + ";" + splitMsg[3] + ";" + splitMsg[4] + ";"
-//							+ splitMsg[5] + ";" + splitMsg[6]);
-//				} 
-//				else if(splitMsg[0].equals("/IMAGE")) {
-//					receiveFile(splitMsg[6], Integer.parseInt(splitMsg[7]));
-//					broadCast("/IMAGE;" + splitMsg[1] + ";" + splitMsg[2] + ";" + splitMsg[3] + ";"
-//							 + splitMsg[4] + ";"  + splitMsg[5] + ";"  + splitMsg[6]);
-//					broadCastImage(splitMsg[6]);
-//				} 
-//				else if(splitMsg[0].equals("/FILE")) {
-//					receiveFile(splitMsg[6], Integer.parseInt(splitMsg[7]));
-//					broadCast("/FILE;" + splitMsg[1] + ";" + splitMsg[2] + ";" + splitMsg[3] + ";"
-//							 + splitMsg[4] + ";"  + splitMsg[5] + ";"  + splitMsg[6]);
-//				} 
-//				else if (splitMsg[0].equals("/FILESAVE")) {
-//					File sendFile = new File(receiveFilePath + "/" + splitMsg[1]); // 파일 생성
-//					int fileSize = (int) sendFile.length(); // 파일 크기 받아오기
-//					broadCast("/FILESEND;" + splitMsg[1] + ";" + fileSize);
-//					sendFile(sendFile, fileSize);
-//				} 
-//				else if (splitMsg[0].equals("/LOGOUT")) {
-//					System.out.println("로그아웃!");
-//					netState = NETSTATE.Home;
-//				}
-//				break;
-//
-//			case Room:
-//				break;
-//			}
-//			
-//		}
-//	}
-	
 
+	/** ClientManager의 Vector을 update하는 메소드 */
+	public void updateAllClientManager(Vector<ClientManager> users) {
+		this.users = users;
+	}
+
+	/** Lobby의 user list를 update하는 메소드 */
+	public void updateUserListInLobby() {
+		for (int i = 0; i < users.size(); i++) {
+			ClientManager imsi = users.elementAt(i);
+
+			// 프로토콜 전송
+			Protocol pt = new Protocol();
+			pt.setStatus(Protocol.UPDATE_USER_LIST);
+			pt.setUserList(setUserListNameInLobby());
+
+			// in Lobby 체크?
+			imsi.sendProtocol(pt);
+		}
+	}
+
+	/** Lobby의 user list의 이름을 setting하는 메소드 */
+	public Vector<String> setUserListNameInLobby() {
+		int listSize = server.users.size();
+		System.out.println("listSize: " + listSize);
+		
+		Vector<String> userListName = new Vector<String>();
+
+		for (int i = 0; i < listSize; i++) {
+			// in Lobby, ""이 아닌 닉네임만
+			if (server.users.get(i).getNetState() == NETSTATE.Lobby && !(server.users.get(i).getNickName()).equals("")) {
+				userListName.add(server.users.get(i).getNickName());
+			}
+		}
+		return userListName;
+	}
+
+	/** Lobby의 game list를 update하는 메소드 */
+	public void updateGameListInLobby() {
+		for (int i = 0; i < users.size(); i++) {
+			ClientManager imsi = users.elementAt(i);
+
+			// 프로토콜 전송
+			Protocol pt = new Protocol();
+			pt.setStatus(Protocol.UPDATE_GAME_LIST);
+			pt.setGameList(setGameListNameInLobby());
+
+			// in Lobby 체크?
+			imsi.sendProtocol(pt);
+		}
+	}
+
+	/** Lobby의 game list의 이름을 setting하는 메소드 */
+	public Vector<String> setGameListNameInLobby() {
+		int listSize = server.rooms.size();
+		Vector<String> gameListName = new Vector<String>();
+
+		for (int i = 0; i < listSize; i++) {
+			gameListName.add(server.rooms.get(i).getRoomName());
+		}
+		return gameListName;
+	}
+
+	/** Protocol broadCasting */
+	void broadCastProtocol(Protocol pt) {
+		for (int i = 0; i < users.size(); i++) {
+			ClientManager imsi = users.elementAt(i);
+			// Lobby에 있는 client에게만 전송
+			if (imsi.getNetState() == NETSTATE.Lobby) {
+				imsi.sendProtocol(pt);
+			}
+		}
+	}
+
+	/** IMAGE 이미지 broadCasting */
+	void broadCastImage(String str) {
+		for (int i = 0; i < users.size(); i++) {
+			ClientManager imsi = users.elementAt(i);
+			imsi.sendImage(str);
+		}
+	}
+
+	/** 사용자가 방을 나갔을 때 처리하는 메소드 */
+	// void userExitInRoom() {
+	// try {
+	// dos.close();
+	// dis.close();
+	// user_socket.close();
+	// if (users.size() == 1) {
+	// if (server.users.size() != 0) {
+	// server.users.get(0).broadCastMsg("/RMROOM " + server.rooms.indexOf(room)
+	// + 1);
+	// }
+	// server.rooms.removeElement(room);
+	// }
+	// users.removeElement(this); // 에러가난 현재 객체를 벡터에서 지운다
+	// if(users.size()!=0) {
+	// users.get(0).broadCastMsg("/RMROOM " + playerNo);
+	// }
+	// server.textArea.append("현재 벡터에 담겨진 사용자 수 : " + users.size() + "\n");
+	// server.textArea.append("사용자 접속 끊어짐 자원 반납\n");
+	// server.textArea.setCaretPosition(server.textArea.getText().length());
+	// server.playerCnt--;
+	// } catch (IOException e) {
+	// // TODO Auto-generated catch block
+	// e.printStackTrace();
+	// }
+	// }
+
+	/* getter */
+	NETSTATE getNetState() {
+		return this.netState;
+	}
+
+	public RoomInfo getRoom() {
+		return this.room;
+	}
+
+	public String getNickName() {
+		return userID;
+	}
+
+	/* setter */
+	public void setNetState(NETSTATE netState) {
+		this.netState = netState;
+	}
+
+	public void setRoom(RoomInfo room) {
+		this.room = room;
+	}
+}

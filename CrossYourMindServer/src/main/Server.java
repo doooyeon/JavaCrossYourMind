@@ -29,10 +29,10 @@ public class Server extends JFrame {
 	private ServerSocket socket; // 서버소켓
 	private Socket soc; // 연결소켓
 	
-	// for entered users
+	// for manage users, rooms -> default
 	int playerCnt = 0;
-	Vector<RoomInfo> rooms  = new Vector<RoomInfo>(); // 연결된 방들을 저장할 벡터
-	Vector<ClientManager> users = new Vector<ClientManager>(); // 연결된 사용자들을 저장할 벡터
+	Vector<RoomInfo> rooms  = new Vector<RoomInfo>(); // 생성된 방들을 저장할 벡터
+	Vector<ClientManager> users = new Vector<ClientManager>(); // 접속한 사용자들을 저장할 벡터
 
 	/** SERVR construction */
 	public Server() {
@@ -100,6 +100,7 @@ public class Server extends JFrame {
 						textArea.append("사용자 접속 대기중...\n");
 						soc = socket.accept(); // accept가 일어나기 전까지는 무한 대기중
 						playerCnt++; //접속자 수를 증가시킨다.
+						
 						textArea.append("사용자 접속!!\n");
 						ClientManager user = new ClientManager(soc, users, playerCnt, Server.this);
 						users.add(user); // 해당 벡터에 사용자 객체를 추가
@@ -113,12 +114,15 @@ public class Server extends JFrame {
 		th.start();
 	}
 	
-//	void addRoom(Room room) {
-//		this.rooms.add(room);
-//	}
-//	void addUserToRoom(ClientManager clientManager, int roomIdx) {	
-//		rooms.get(roomIdx).addUser(clientManager);
-//	}
+	/** Room 생성한 방을 벡터에 추가하는 메소드 */
+	void addRoom(RoomInfo room) {
+		this.rooms.add(room);
+	}
+	
+	/** Room Client를 방에 추가하는 메소드 */
+	void addUserToRoom(ClientManager clientManager, int roomIdx) {	
+		rooms.get(roomIdx).addUser(clientManager);
+	}
 
 	public static void main(String[] args) {
 		Server frame = new Server();

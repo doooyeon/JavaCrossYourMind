@@ -206,11 +206,13 @@ public class HomePanel extends ReceiveJPanel {
 	public void receiveProtocol(Protocol pt) {
 		int status = pt.getStatus();
 		System.out.println("<HomePanel> receiveProtocol status: " + status);
-		
+
 		if (status == Protocol.SUCCESSLOGIN) {
 			userInfo = pt.getUserInfo();
 			// cymFrame.sequenceControl("lobbyPanel", arg0);
 			cymFrame.sequenceControl("lobbyPanel", 0);
+			
+			
 		}
 	}
 }

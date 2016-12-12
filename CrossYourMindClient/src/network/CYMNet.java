@@ -224,7 +224,7 @@ public class CYMNet {
 	}
 
 	/** 서버로부터 파일을 수신하는 메소드 */
-	public void receiveFile(String receiveFilePath, String receiveFileName, int receiveFileSize) {
+	public void receiveFile(String receiveFilePath, String receiveFileName, long receiveFileSize) {
 		int byteSize = 10000;
 		byte[] ReceiveByteArrayToFile = new byte[byteSize];
 

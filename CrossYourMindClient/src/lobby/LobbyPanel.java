@@ -9,6 +9,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -391,7 +392,7 @@ public class LobbyPanel extends ReceiveJPanel {
 	}
 
 	/** Lobby에 표시되는 접속자들을 업데이트하는 메서드 */
-	public void updateLobbyUser(ArrayList<String> updated) {
+	public void updateLobbyUser(Vector<String> updated) {
 		usersLobby = new String[updated.size()];
 		for (int i = 0; i < updated.size(); i++) {
 			usersLobby[i] = "  " + updated.get(i);
@@ -400,7 +401,7 @@ public class LobbyPanel extends ReceiveJPanel {
 	}
 
 	/** Lobby에 표시되는 게임방 이름들을 업데이트하는 메서드 */
-	public void updateLobbyGame(ArrayList<String> updated) {
+	public void updateLobbyGame(Vector<String> updated) {
 		gamesLobby = new String[updated.size()];
 		for (int i = 0; i < updated.size(); i++) {
 			gamesLobby[i] = "  " + updated.get(i);
@@ -471,19 +472,6 @@ public class LobbyPanel extends ReceiveJPanel {
 
 		appendRightMyMsg(nickname, offset);
 	}
-	// public void appendMessage(String ChatImgPath, String ProfileImgPath,
-	// String id, String charName, int level, String msg) {
-	// StyledDocument doc = ChattingPane.getStyledDocument();
-	//
-	// setIconListener(ChatImgPath, ProfileImgPath, id, charName, level);
-	//
-	// int offset = doc.getLength();
-	// String nickname = "[" + id + "]";
-	// appendString(nickname + " " + msg + "\n");
-	//
-	// appendRightMyMsg(nickname, offset);
-	//
-	// }
 
 	/** 채팅에 IMAGE 붙이는 메서드 */
 	public void appendImage(Protocol pt) {
@@ -510,30 +498,6 @@ public class LobbyPanel extends ReceiveJPanel {
 
 		appendRightMyMsg(nickname, offset);
 	}
-	// public void appendImage(String ChatImgPath, String ProfileImgPath, String
-	// id, String charName, int level, String fileName) {
-	// ImageIcon [] receiveImage = cymNet.receiveImageIcon();
-	// ImageIcon receiveOriginalImage = receiveImage[0];
-	// ImageIcon receiveResizingImage = receiveImage[1];
-	//
-	// StyledDocument doc = ChattingPane.getStyledDocument();
-	//
-	// int offset = doc.getLength();
-	//
-	// setIconListener(ChatImgPath, ProfileImgPath, id, charName, level);
-	// String nickname = "[" + id + "]";
-	// appendString(nickname + " ");
-	//
-	// JLabel resizingImageLabel = new JLabel(receiveResizingImage);
-	// resizingImageLabel.addMouseListener(new
-	// MyImageClickListener(receiveOriginalImage)); // 리사이징이미지 리스너 설정
-	// appendComponent(resizingImageLabel);
-	// setSaveBtnListener(fileName);
-	//
-	// appendString("\n");
-	//
-	// appendRightMyMsg(nickname, offset);
-	// }
 
 	/** 채팅에 FILE 붙이는 메서드 */
 	public void appendFileInfo(Protocol pt) {
@@ -550,22 +514,6 @@ public class LobbyPanel extends ReceiveJPanel {
 		appendString("\n");
 		appendRightMyMsg(nickname, offset);
 	}
-	// public void appendFileInfo(String ChatImgPath, String ProfileImgPath,
-	// String id, String charName, int level, String fileName) {
-	// StyledDocument doc = ChattingPane.getStyledDocument();
-	//
-	// int offset = doc.getLength();
-	//
-	// setIconListener(ChatImgPath, ProfileImgPath, id, charName, level);
-	// String nickname = "[" + id + "]";
-	// appendString(nickname + " " + fileName);
-	//
-	// setSaveBtnListener(fileName);
-	//
-	// appendString("\n");
-	//
-	// appendRightMyMsg(nickname, offset);
-	// }
 
 	/** Profile Icon 이벤트 리스너 */
 	public void setIconListener(Protocol pt) {
@@ -574,14 +522,6 @@ public class LobbyPanel extends ReceiveJPanel {
 		iconLabel.addMouseListener(new MyProfileClickListener(pt));
 		appendComponent(iconLabel);
 	}
-	// public void setIconListener(String charImagPath, String ProfileImgPath,
-	// String id, String charName, int level) {
-	// icon = new ImageIcon(charImagPath);
-	// iconLabel = new JLabel(icon);
-	// iconLabel.addMouseListener(new MyProfileClickListener(ProfileImgPath, id,
-	// charName, level));
-	// appendComponent(iconLabel);
-	// }
 
 	/** Save button 이벤트 리스너 */
 	public void setSaveBtnListener(String fileName) {
@@ -598,27 +538,35 @@ public class LobbyPanel extends ReceiveJPanel {
 		System.out.println("<LobbyPanel> receiveProtocol");
 		switch (pt.getStatus()) {
 		case Protocol.MSG:
+			System.out.println("<LobbyPanel> Protocol.MSG");
 			appendMessage(pt);
 			break;
 		case Protocol.IMAGE:
+			System.out.println("<LobbyPanel> Protocol.IMAGE");
 			appendImage(pt);
 			break;
 		case Protocol.FILE:
+			System.out.println("<LobbyPanel> Protocol.FILE");
 			appendFileInfo(pt);
 			break;
 		case Protocol.FILESEND:
+			System.out.println("<LobbyPanel> Protocol.FILESEND");
 			String saveFolder = receiveFilePath; // 경로
-			String receiveFileName = pt.getSendFileName(); // 서버로부터 받을 파일 이름
-			int receiveFileSize = (int) pt.getSendFileSize(); // 서버로부터 받을 파일 크기
 			File targetDir = new File(saveFolder);
 
 			if (!targetDir.exists()) { // 디렉토리 없으면 생성.
 				targetDir.mkdirs();
 			}
-			cymNet.receiveFile(receiveFilePath, receiveFileName, receiveFileSize);
-			break;
-		}
+			cymNet.receiveFile(receiveFilePath, pt.getSendFileName(), pt.getSendFileSize());
 
+			break;
+		case Protocol.UPDATE_GAME_LIST:
+			System.out.println("<LobbyPanel> Protocol.UPDATE_GAME_LIST");
+			updateLobbyGame(pt.getGameList());
+		case Protocol.UPDATE_USER_LIST:
+			System.out.println("<LobbyPanel> Protocol.UPDATE_USER_LIST");
+			updateLobbyUser(pt.getUserList());
+		}
 	}
 }
 
@@ -670,10 +618,9 @@ class MyFileSavaBtnClickListener extends MouseAdapter {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// cymNet.sendMSG("/FILESAVE;" + fileName);
 		// 프로토콜 전송
 		Protocol pt = new Protocol();
-		pt.setStatus(Protocol.FILESEND);
+		pt.setStatus(Protocol.FILESAVE);
 		pt.setSendFileName(fileName);
 		cymNet.sendProtocol(pt);
 	}
