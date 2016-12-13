@@ -243,14 +243,23 @@ public class ClientManager extends Thread {
 						server.addUserToRoom(this, roomName); // Client를 방에 추가
 
 						pt.setStatus(Protocol.LOBBY_CREATE_ROOM_SUCCESS);
-						pt.setUsersInRoom(room.getUsersInfo()); // 방에 있는 Client의
-																// UserInfo
-																// Vector
 						sendProtocol(pt);
 						System.out.println("<ClientManager> send CREATE_ROOM_SUCCESS");
 
-						updateUserListInLobby(); // UserList업데이트
 					}
+					break;
+				case Protocol.GAME_IN:
+					System.out.println("<ClientManager> Protocol.GAME_IN");
+					pt.setStatus(Protocol.GAME_CREATED);
+					pt.setUsersInRoom(room.getUsersInfo()); // 방에 있는 Client의
+															// UserInfo
+															// Vector
+					sendProtocol(pt);
+					System.out.println("<ClientManager> send GAME_CREATED");
+
+					updateGameListInLobby(); // GameList업데이트
+					updateUserListInLobby(); // UserList업데이트
+					break;
 				}
 			} catch (IOException e) {
 				try {

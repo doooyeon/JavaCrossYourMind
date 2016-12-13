@@ -23,6 +23,8 @@ public class Protocol implements Serializable {
 	public static final int LOBBY_CREATE_ROOM_SUCCESS = 210;
 
 	// in gamePanel
+	public static final int GAME_IN = 301;
+	public static final int GAME_CREATED = 302;
 
 	public static final int START = 401;
 	public static final int EXIT = 402;

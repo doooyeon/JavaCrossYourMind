@@ -1,29 +1,17 @@
 package room;
 
-import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.geom.Line2D;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 import javax.swing.border.LineBorder;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Style;
@@ -73,7 +61,7 @@ public class RoomPanel extends ReceiveJPanel  {
 	   private int drawThick;
 
 	   // For game operation
-	   private ArrayList<UserInfo> usersGame;
+	   private Vector<UserInfo> usersList;
 	   private boolean gameStarted;
 	   private boolean isQuestioner;
 	   private long gameTime;
@@ -102,7 +90,7 @@ public class RoomPanel extends ReceiveJPanel  {
 	      // Initialize data
 	      this.setLayout(null);
 	      pList = new ArrayList<PointInfo>();
-	      usersGame = new ArrayList<UserInfo>();
+	      usersList = new Vector<UserInfo>();
 
 	      // For north panel
 	      northPanel = new JPanel();
@@ -421,120 +409,124 @@ public class RoomPanel extends ReceiveJPanel  {
 ////	         }
 ////	      });
 //	   }
+	   
+	   /** 인자로 주어진 사용자들로 EW 패널을 새로 업데이트하는 메소드 */
+	   public void updateRoomPanel(Vector<UserInfo> usersList) {
+	      this.usersList = usersList;
+	      updateGameEWPanel();
+	   }
 
-//	   /**
-//	    * When a new user enters game, updates the west&east panel with updated
-//	    * user list in game
-//	    */
-//	   private void updatePanel() {
-//	      westPanel.removeAll();
-//	      eastPanel.removeAll();
-//	      int size = usersGame.size();
-//
-//	      // Initialize score of each player
-//	      for (UserInfo ui : usersGame) {
-//	         ui.set_score(0);
-//	      }
-//	      answer.setText("ANSWER");
-//	      timer.setText("TIMER");
-//
-//	      // Re-draw userNpanel according the number of users currently in game
-//	      switch (size) {
-//
-//	      case 4: {
-//	         updateMethodPanel(4);
-//	         userPanel[3].setLocation(3, 168);
-//	         eastPanel.add(userPanel[3]);
-//	      }
-//	      case 3: {
-//	         updateMethodPanel(3);
-//	         userPanel[2].setLocation(3, 168);
-//	         westPanel.add(userPanel[2]);
-//	      }
-//	      case 2: {
-//	         updateMethodPanel(2);
-//	         userPanel[1].setLocation(3, 3);
-//	         eastPanel.add(userPanel[1]);
-//
-//	      }
-//	      case 1: {
-//	         updateMethodPanel(1);
-//	         userPanel[0].setLocation(3, 3);
-//	         westPanel.add(userPanel[0]);
-//	      }
-//	      }
-//	      eastPanel.revalidate();
-//	      eastPanel.repaint();
-//	      westPanel.revalidate();
-//	      westPanel.repaint();
-//	   }
-//
-//	   private void updateMethodPanel(int i) {
-//	      int index = i - 1;
-//
-//	      userPanel[index] = new JPanel(null);
-//	      userPanel[index].setSize(123, 164);
-//	      userPanel[index].setBackground(new Color(255, 230, 156));
-//	      userPanel[index].setOpaque(true);
-//
-//	      userChar[index] = new JLabel(new ImageIcon(usersGame.get(index).get_gamecharImagePath()));
-//	      userChar[index].setBounds(0, 0, 100, 100);
-//	      StyleContext contextUser = new StyleContext();
-//	      StyledDocument documentUser = new DefaultStyledDocument(contextUser);
-//	      Style styleUser = contextUser.getStyle(StyleContext.DEFAULT_STYLE);
-//	      StyleConstants.setAlignment(styleUser, StyleConstants.ALIGN_CENTER);
-//	      userChat[index] = new JTextPane(documentUser);
-//	      userChat[index].setBounds(0, 100, 123, 30);
-//	      userChat[index].setFont(new Font(ProgressInfo.FONT, Font.BOLD, 15));
-//	      userChat[index].setText("");
-//	      userChat[index].setBorder(new LineBorder(Color.black, 2));
-//	      userChat[index].setEditable(false);
-//
-//	      userNickname[index] = new JLabel();
-//	      userNickname[index].setText(usersGame.get(index).get_nickName());
-//	      userNickname[index].setBounds(5, 132, 115, 15);
-//	      userNickname[index].setFont(new Font(ProgressInfo.FONT, Font.BOLD, 15));
-//	      userScoreLabel[index] = new JLabel();
-//	      userScoreLabel[index].setText("SCORE:");
-//	      userScoreLabel[index].setBounds(3, 148, 40, 13);
-//	      userScoreLabel[index].setFont(new Font(ProgressInfo.FONT, Font.PLAIN, 13));
-//	      userScore[index] = new JLabel();
-//	      userScore[index].setText(Integer.toString(usersGame.get(index).get_score()));
-//	      userScore[index].setBounds(45, 148, 15, 13);
-//	      userScore[index].setFont(new Font(ProgressInfo.FONT, Font.PLAIN, 13));
-//	      userLevelLabel[index].setText("LEVEL:");
-//	      userLevelLabel[index].setBounds(65, 148, 40, 13);
-//	      userLevelLabel[index].setFont(new Font(ProgressInfo.FONT, Font.PLAIN, 13));
-//	      userLevel[index] = new JLabel();
-//	      userLevel[index].setText(Integer.toString(usersGame.get(index).get_level()));
-//	      userLevel[index].setBounds(107, 148, 15, 13);
-//	      userLevel[index].setFont(new Font(ProgressInfo.FONT, Font.PLAIN, 13));
-//
-//	      userPanel[index].add(userChat[index]);
-//	      userPanel[index].add(userChar[index]);
-//	      userPanel[index].add(userNickname[index]);
-//	      userPanel[index].add(userScoreLabel[index]);
-//	      userPanel[index].add(userScore[index]);
-//	      userPanel[index].add(userLevelLabel[index]);
-//	      userPanel[index].add(userLevel[index]);
-//	   }
-//
-//	   /**
-//	    * Update score of user who got correct answer
-//	    * 
-//	    * @param nickname
-//	    *            of target user to update score
-//	    */
-//	   public void scoreUpdate(String nickName) {
-//	      int score = 0;
-//	      // Update the score of target user
-//	      for (UserInfo ui : usersGame) {
-//	         if (ui.get_nickName().equals(nickName)) {
-//	            ui.inc_score();
-//	            score = ui.get_score();
-//	         }
-//	      }
-//
+	   /** 새로운 사용자가 들어왔을 때 EW 패널 업데이트 */
+	   private void updateGameEWPanel() {
+	      westPanel.removeAll();
+	      eastPanel.removeAll();
+	      int usersListSize = usersList.size();
+
+	      // Initialize score of each player
+	      for (UserInfo ui : usersList) {
+	         ui.setMyScore(0);
+	      }
+	      answer.setText("ANSWER");
+	      timer.setText("TIMER");
+
+	      // Re-draw userNpanel according the number of users currently in game
+	      switch (usersListSize) {
+	      case 4: {
+	    	  updateGameUserPanel(4);
+	         userPanel[3].setLocation(3, 168);
+	         eastPanel.add(userPanel[3]);
+	      }
+	      case 3: {
+	    	  updateGameUserPanel(3);
+	         userPanel[2].setLocation(3, 168);
+	         westPanel.add(userPanel[2]);
+	      }
+	      case 2: {
+	    	  updateGameUserPanel(2);
+	         userPanel[1].setLocation(3, 3);
+	         eastPanel.add(userPanel[1]);
+	      }
+	      case 1: {
+	    	  updateGameUserPanel(1);
+	         userPanel[0].setLocation(3, 3);
+	         westPanel.add(userPanel[0]);
+	      }
+	      }
+	      eastPanel.revalidate();
+	      eastPanel.repaint();
+	      westPanel.revalidate();
+	      westPanel.repaint();
+	   }
+
+	   /** EW Panel에 들어갈 사용자 패널을 업데이트하는 메소드 */
+	   private void updateGameUserPanel(int i) {
+	      int index = i - 1;
+
+	      userPanel[index] = new JPanel(null);
+	      userPanel[index].setSize(123, 164);
+	      userPanel[index].setBackground(new Color(255, 230, 156));
+	      userPanel[index].setOpaque(true);
+
+	      userChar[index] = new JLabel(new ImageIcon(usersList.get(index).getMyGameCharImagePath()));
+	      userChar[index].setBounds(0, 0, 100, 100);
+	      StyleContext contextUser = new StyleContext();
+	      StyledDocument documentUser = new DefaultStyledDocument(contextUser);
+	      Style styleUser = contextUser.getStyle(StyleContext.DEFAULT_STYLE);
+	      StyleConstants.setAlignment(styleUser, StyleConstants.ALIGN_CENTER);
+	      userChat[index] = new JTextPane(documentUser);
+	      userChat[index].setBounds(0, 100, 123, 30);
+	      userChat[index].setFont(new Font(CYMFrame.FONT, Font.BOLD, 15));
+	      userChat[index].setText("");
+	      userChat[index].setBorder(new LineBorder(Color.black, 2));
+	      userChat[index].setEditable(false);
+
+	      userNickname[index] = new JLabel();
+	      userNickname[index].setText(usersList.get(index).getMyNickname());
+	      userNickname[index].setBounds(5, 132, 115, 15);
+	      userNickname[index].setFont(new Font(CYMFrame.FONT, Font.BOLD, 15));
+	      userScoreLabel[index] = new JLabel();
+	      userScoreLabel[index].setText("SCORE:");
+	      userScoreLabel[index].setBounds(3, 148, 40, 13);
+	      userScoreLabel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+	      userScore[index] = new JLabel();
+	      userScore[index].setText(Integer.toString(usersList.get(index).getMyScore()));
+	      userScore[index].setBounds(45, 148, 15, 13);
+	      userScore[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+	      userLevelLabel[index].setText("LEVEL:");
+	      userLevelLabel[index].setBounds(65, 148, 40, 13);
+	      userLevelLabel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+	      userLevel[index] = new JLabel();
+	      userLevel[index].setText(Integer.toString(usersList.get(index).getMyLevel()));
+	      userLevel[index].setBounds(107, 148, 15, 13);
+	      userLevel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+
+	      userPanel[index].add(userChat[index]);
+	      userPanel[index].add(userChar[index]);
+	      userPanel[index].add(userNickname[index]);
+	      userPanel[index].add(userScoreLabel[index]);
+	      userPanel[index].add(userScore[index]);
+	      userPanel[index].add(userLevelLabel[index]);
+	      userPanel[index].add(userLevel[index]);
+	   }
+
+	   /** 정답을 맞췄을 때 맞춘 사용자의 점수를 업데이트하는 메소드 */
+	   public void scoreUpdate(String nickName) {
+	      int score = 0;
+	      // Update the score of target user
+	      for (UserInfo ui : usersList) {
+	         if (ui.getMyNickname().equals(nickName)) {
+	            ui.increaseScore();
+	            score = ui.getMyScore();
+	         }
+	      }
+
+		// Update display of score for target user
+		for (int i = 3; i >= 0; i--) {
+			if (!(userNickname[i].getText().equals(""))) {
+				if (userNickname[i].getText().equals(nickName))
+					userScore[i].setText(String.valueOf(score));
+			}
+		}
 //	      // Update display of score for target user
 //	      if (!(userNickname[3].getText().equals(""))) {
 //	         if (userNickname[3].getText().equals(nickName))
@@ -552,30 +544,9 @@ public class RoomPanel extends ReceiveJPanel  {
 //	         if (userNickname[0].getText().equals(nickName))
 //	            userScore[0].setText(String.valueOf(score));
 //	      }
-//	   }
-//
-//	   /**
-//	    * Invoke updatePanel function to redraw west&east panel
-//	    * 
-//	    * @param list
-//	    *            of the users in this game
-//	    */
-//	   public void joinApproved(ArrayList<UserInfo> usersGame) {
-//	      this.usersGame = usersGame;
-//	      System.out.println("f : " + usersGame);
-//	      updatePanel();
-//	   }
-//
-//	   /**
-//	    * Invoke updatePanel function to draw west&east panel at first
-//	    * 
-//	    * @param list
-//	    *            of the users in this game
-//	    */
-//	   public void createApproved(ArrayList<UserInfo> usersGame) {
-//	      this.usersGame = usersGame;
-//	      updatePanel();
-//	   }
+	   }
+
+	   
 //
 //	   /**
 //	    * Inform user that unable to start game because the user is not game master
@@ -917,7 +888,15 @@ public class RoomPanel extends ReceiveJPanel  {
 	/** 서버로부터 Protocol을 수신받는 오버라이딩 메서드 */
 	@Override
 	public void receiveProtocol(Protocol pt){
-		
+		int status = pt.getStatus();
+		System.out.println("<RoomPanel> receiveProtocol status: " + status);
+
+		switch(status){
+		case Protocol.GAME_CREATED:
+			usersList = pt.getUsersInRoom();
+			updateRoomPanel(usersList);
+			break;
+		}
 	}
 
 }

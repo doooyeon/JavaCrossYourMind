@@ -196,6 +196,7 @@ public class HomePanel extends ReceiveJPanel {
 			pt.setStatus(Protocol.HOME_LOGIN);
 			pt.setUserInfo(userInfo);
 			cymNet.sendProtocol(pt);
+			System.out.println("<HomePanel> send HOME_LOGIN");
 
 			nickNameTextField.setText("");
 		}
@@ -206,13 +207,14 @@ public class HomePanel extends ReceiveJPanel {
 	public void receiveProtocol(Protocol pt) {
 		int status = pt.getStatus();
 		System.out.println("<HomePanel> receiveProtocol status: " + status);
-
-		if (status == Protocol.HOME_SUCCESSLOGIN) {
+		
+		switch(status){
+		case Protocol.HOME_SUCCESSLOGIN:
+			System.out.println("<HomePanel> Protocol.HOME_SUCCESSLOGIN");	
 			userInfo = pt.getUserInfo();
 			// cymFrame.sequenceControl("lobbyPanel", arg0);
 			cymFrame.sequenceControl("lobbyPanel", 0);
-			
-			
+			break;
 		}
 	}
 }

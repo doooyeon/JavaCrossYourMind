@@ -579,9 +579,10 @@ public class LobbyPanel extends ReceiveJPanel {
 			closeCreateDialog();
 
 			// 프로토콜 전송
-			// Protocol pt = new Protocol();
-			// pt.setStatus(Protocol.LOGOUT);
-			// cymNet.sendProtocol(pt);
+			 Protocol ptSendToClient = new Protocol();
+			 ptSendToClient.setStatus(Protocol.GAME_IN);
+			 cymNet.sendProtocol(ptSendToClient);
+			 System.out.println("<LobbyPanel> send GAME_IN");
 			break;
 		}
 	}

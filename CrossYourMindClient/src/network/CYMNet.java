@@ -135,11 +135,13 @@ public class CYMNet {
 			@Override
 			public void run() {
 				while (true) {
-					switch (netState) {
-					case Home:
-						System.out.println("<CYMNet> Enter Home");
-					case Lobby:
-						System.out.println("<CYMNet> Enter Lobby");
+//					switch (netState) {
+//					case Home:
+//						System.out.println("<CYMNet> Enter Home");
+//					case Lobby:
+//					case Room:
+//						System.out.println("<CYMNet> Room 들어옴");
+//						System.out.println("<CYMNet> Enter Lobby");
 						try {
 							System.out.println("ois -> 1111");
 							ois = new ObjectInputStream(is);
@@ -178,9 +180,7 @@ public class CYMNet {
 							e.printStackTrace();
 							break;
 						}
-					case Room:
-						System.out.println("<CYMNet> Room 들어옴");
-					}
+					//}
 				} // while문 끝
 			}// run메소드 끝
 		});// thread 정의 끝
