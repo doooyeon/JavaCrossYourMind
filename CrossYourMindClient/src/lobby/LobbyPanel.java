@@ -230,7 +230,6 @@ public class LobbyPanel extends ReceiveJPanel {
 					Protocol pt = new Protocol();
 					pt.setStatus(Protocol.LOBBY_CHAT_MSG);
 					pt.setUserInfo(userInfo);
-					System.out.println("<LobbyPanel> userInfo charPath: " + userInfo.getMyChatImagePath());
 					pt.setLobbyChatSentence(lobbyChatSentence);
 					cymNet.sendProtocol(pt);
 				}
@@ -255,7 +254,6 @@ public class LobbyPanel extends ReceiveJPanel {
 					return;
 				}
 				String filePath = chooser.getSelectedFile().getPath();
-				// fileSend(filePath, "/IMAGE;");
 				// 프로토콜 전송
 				fileSend(filePath, Protocol.LOBBY_CHAT_IMAGE);
 			}
@@ -275,7 +273,6 @@ public class LobbyPanel extends ReceiveJPanel {
 					return;
 				}
 				String filePath = chooser.getSelectedFile().getPath();
-				// fileSend(filePath, "/FILE;");
 				// 프로토콜 전송
 				fileSend(filePath, Protocol.LOBBY_CHAT_FILE);
 			}
@@ -300,23 +297,26 @@ public class LobbyPanel extends ReceiveJPanel {
 			}
 		});
 
-		// // Double click the game to join
-		// gameList.addMouseListener(new MouseAdapter() {
-		// public void mouseClicked(MouseEvent e) {
-		// if (e.getClickCount() == 2) {
-		// if (gameList.getSelectedIndex() == -1) {
-		// JOptionPane.showMessageDialog(LobbyPanel.this.mainFrame.getContentPane(),
-		// "Select the room.");
-		// } else {
-		// System.out.println("I'm here!");
-		// ProgressInfo pi = new ProgressInfo();
-		// pi.set_status(ProgressInfo.JOIN_GAME_TRY);
-		// pi.set_chat(gameList.getSelectedValue().trim());
-		// LobbyPanel.this.mainFrame.sendProtocol(pi);
-		// }
-		// }
-		// }
-		// });
+		// room list double click 이벤트
+		gameList.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					if (gameList.getSelectedIndex() == -1) {
+						JOptionPane.showMessageDialog(cymFrame.getContentPane(), "Select the room.");
+					} else {
+						System.out.println("<LobbyPanel> want to enter the room!");
+
+						// 프로토콜 전송
+						Protocol pt = new Protocol();
+						pt.setStatus(Protocol.LOBBY_JOIN_ROOM);
+						pt.setRoomName(gameList.getSelectedValue().trim());
+						System.out.println("TEST <LobbyPanel> enter room name: " + gameList.getSelectedValue().trim());
+						pt.setUserInfo(userInfo);
+						cymNet.sendProtocol(pt);
+					}
+				}
+			}
+		});
 	}
 
 	/** 선택한 이미지나 파일을 서버로 보내는 메서드 */
@@ -579,10 +579,24 @@ public class LobbyPanel extends ReceiveJPanel {
 			closeCreateDialog();
 
 			// 프로토콜 전송
-			 Protocol ptSendToClient = new Protocol();
-			 ptSendToClient.setStatus(Protocol.GAME_IN);
-			 cymNet.sendProtocol(ptSendToClient);
-			 System.out.println("<LobbyPanel> send GAME_IN");
+			pt.setStatus(Protocol.GAME_IN);
+			cymNet.sendProtocol(pt);
+			System.out.println("<LobbyPanel> send GAME_IN");
+			break;
+		case Protocol.LOBBY_JOIN_ROOM_FAIL:
+			System.out.println("<LobbyPanel> Protocol.LOBBY_JOIN_ROOM_FAIL");
+			JOptionPane.showMessageDialog(cymFrame.getContentPane(), "The game is full or already started!");
+			break;
+		case Protocol.LOBBY_JOIN_ROOM_SUCCESS:
+			System.out.println("<LobbyPanel> Protocol.LOBBY_JOIN_ROOM_SUCCESS");
+			ChattingPane.setText("");
+			cymFrame.sequenceControl("roomPanel", 0);
+			closeCreateDialog();
+
+			// 프로토콜 전송
+			pt.setStatus(Protocol.GAME_JOIN_IN);
+			cymNet.sendProtocol(pt);
+			System.out.println("<LobbyPanel> send GAME_JOIN_IN");
 			break;
 		}
 	}
@@ -688,7 +702,7 @@ public class LobbyPanel extends ReceiveJPanel {
 		}
 	}
 
-	/** 프로필 클릭 이벤트에 대한 클래스 */
+	/** 프로필 클릭 이벤트에 대한 내부 클래스 */
 	class MyProfileClickListener extends MouseAdapter {
 		private ImageIcon profileImg;
 		private String id;
@@ -710,7 +724,7 @@ public class LobbyPanel extends ReceiveJPanel {
 		}
 	}
 
-	/** 이미지 클릭 이벤트에 대한 클래스 */
+	/** 이미지 클릭 이벤트에 대한 내부 클래스 */
 	class MyImageClickListener extends MouseAdapter {
 		private ImageIcon imageIcon;
 
@@ -724,7 +738,7 @@ public class LobbyPanel extends ReceiveJPanel {
 		}
 	}
 
-	/** 저장 버튼 클릭 이벤트에 대한 클래스 */
+	/** 저장 버튼 클릭 이벤트에 대한 내부 클래스 */
 	class MyFileSavaBtnClickListener extends MouseAdapter {
 		private CYMNet cymNet;
 		private String fileName;

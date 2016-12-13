@@ -896,6 +896,10 @@ public class RoomPanel extends ReceiveJPanel  {
 			usersList = pt.getUsersInRoom();
 			updateRoomPanel(usersList);
 			break;
+		case Protocol.GAME_JOIN_PARTIPANT:
+			usersList = pt.getUsersInRoom();
+			updateRoomPanel(usersList);
+			break;
 		}
 	}
 

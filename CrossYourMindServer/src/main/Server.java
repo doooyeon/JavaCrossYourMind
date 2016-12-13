@@ -132,10 +132,10 @@ public class Server extends JFrame {
 
 	/** Room Client를 방에 추가하는 메소드 */
 	public void addUserToRoom(ClientManager clientManager, String roomName) {
-		for(RoomInfo roomInfo : rooms){
-			if(roomInfo.getRoomName().equals(roomName)){
+		for (RoomInfo roomInfo : rooms) {
+			if (roomInfo.getRoomName().equals(roomName)) {
 				roomInfo.addUser(clientManager);
-				
+
 				System.out.println("<>");
 				System.out.println(clientManager.getUserInfo().getMyNickname());
 				System.out.println(clientManager.getUserInfo().getMyLevel());
@@ -153,6 +153,30 @@ public class Server extends JFrame {
 		}
 		return false;
 	}
+
+	/** Room 생성한 방이 가득찼는지 확인하는 메소드 */
+	public boolean checkFullRoom(String roomName) {
+		for (RoomInfo roomInfo : rooms) {
+			if (roomInfo.getRoomName().equals(roomName)) {
+				if (roomInfo.getUsersCount() == 4 || roomInfo.getRoomStatus() == RoomInfo.ROOM_PLAYING)
+					return true;
+			}
+		}
+		return false;
+	}
+
+	// /** Room 해당하는 roomName에 있는 ClientManager Vector를 반환 */
+	// public Vector<ClientManager> getClientManagerV(String roomName) {
+	// Vector<ClientManager> users = new Vector<ClientManager>();
+	//
+	// for (int i = 0; i < rooms.size(); i++) {
+	// if (rooms.get(i).getRoomName().equals(roomName)) {
+	// users = rooms.get(i).getUsersClientManager();
+	// break;
+	// }
+	// }
+	// return users;
+	// }
 
 	public static void main(String[] args) {
 		Server frame = new Server();

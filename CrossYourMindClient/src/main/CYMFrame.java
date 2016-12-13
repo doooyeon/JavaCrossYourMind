@@ -102,8 +102,8 @@ public class CYMFrame extends JFrame {
 		case "lobbyPanel":
 			cymNet.toLobbyPanel();
 			cymNet.setStateToLobby();
-//			for (int i = 0; i < arg0; i++)
-//				lobbyPanel.addRoom();
+			// for (int i = 0; i < arg0; i++)
+			// lobbyPanel.addRoom();
 			changePanel(panelName);
 			lobbyPanel.myInfoUpdate();
 			repaint();
@@ -137,28 +137,33 @@ public class CYMFrame extends JFrame {
 	public CYMNet getCYMNet() {
 		return this.cymNet;
 	}
-	
+
 	/* getter for Userinfo */
 	public UserInfo getUserInfo() {
 		return userInfo;
 	}
-	
+
 	/* getter for ImageList */
 	public ArrayList<String> getCharImageList() {
 		return entrycharImageList;
 	}
+
 	public ArrayList<String> getCharEnteredImageList() {
 		return entryEnteredcharImageList;
 	}
+
 	public ArrayList<String> getLobbyImageList() {
 		return lobbyImageList;
 	}
+
 	public ArrayList<String> getTalkcharImageList() {
 		return talkcharImageList;
 	}
+
 	public ArrayList<String> getProfileImageList() {
 		return profileImageList;
 	}
+
 	public ArrayList<String> getGamecharImageList() {
 		return gamecharImageList;
 	}
@@ -167,12 +172,12 @@ public class CYMFrame extends JFrame {
 	class ExitListener implements WindowListener {
 		@Override
 		public void windowClosing(WindowEvent e) {
-			//cymNet.sendMSG("/EXIT");
-			//프로토콜 전송
-			Protocol pt = new Protocol(); 
+			// cymNet.sendMSG("/EXIT");
+			// 프로토콜 전송
+			Protocol pt = new Protocol();
 			pt.setStatus(Protocol.EXIT);
 			cymNet.sendProtocol(pt);
-			
+
 			System.out.println("프로그램 종료");
 			System.exit(0);
 		}

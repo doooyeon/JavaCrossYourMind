@@ -37,14 +37,14 @@ public class UserInfo implements Serializable {
 		myRoomName = null;
 		myScore = 0;
 	}
-	
+
 	/** 사용자의 게임 점수를 증가시키는 메소드 */
-	public void increaseScore(){
+	public void increaseScore() {
 		myScore++;
 	}
-	
+
 	/** 사용자의 게임 점수를 감소시키는 메소드 */
-	public void decreaseScore(){
+	public void decreaseScore() {
 		myScore--;
 	}
 

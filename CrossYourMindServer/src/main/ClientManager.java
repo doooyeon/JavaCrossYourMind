@@ -182,8 +182,8 @@ public class ClientManager extends Thread {
 					sendProtocol(pt);
 					System.out.println("<ClientManager> send SUCCESSLOGIN");
 					netState = NETSTATE.Lobby; // 로비로 이동
-					
-					userInfo = pt.getUserInfo(); //프로토콜로 받은 사용자 정보 세팅
+
+					userInfo = pt.getUserInfo(); // 프로토콜로 받은 사용자 정보 세팅
 					updateGameListInLobby(); // GameList업데이트
 					updateUserListInLobby(); // UserList업데이트
 					break;
@@ -228,6 +228,7 @@ public class ClientManager extends Thread {
 						userInfo.setIsMaster(true); // 주인장으로 표시
 
 						server.addRoom(room); // 방을 벡터에 추가
+						// roomName = null?
 						server.addUserToRoom(this, roomName); // Client를 방에 추가
 
 						pt.setStatus(Protocol.LOBBY_CREATE_ROOM_SUCCESS);
@@ -246,7 +247,47 @@ public class ClientManager extends Thread {
 															// Vector
 					sendProtocol(pt);
 					System.out.println("<ClientManager> send GAME_CREATED");
-					
+
+					break;
+				case Protocol.LOBBY_JOIN_ROOM:
+					System.out.println("<ClientManager> Protocol.LOBBY_JOIN_ROOM");
+					if (server.checkFullRoom(pt.getRoomName())) {
+						pt.setStatus(Protocol.LOBBY_JOIN_ROOM_FAIL);
+						sendProtocol(pt);
+						System.out.println("<ClientManager> send LOBBY_JOIN_ROOM_FAIL");
+					} else {
+						netState = NETSTATE.Room;
+						userInfo.setIsMaster(false); // 주인장 X
+
+						// roomName = null?
+						server.addUserToRoom(this, pt.getRoomName()); // Client를
+																		// 방에 추가
+
+						pt.setStatus(Protocol.LOBBY_JOIN_ROOM_SUCCESS);
+						sendProtocol(pt);
+						System.out.println("<ClientManager> send LOBBY_JOIN_ROOM_SUCCESS");
+
+						updateGameListInLobby(); // GameList업데이트
+						updateUserListInLobby(); // UserList업데이트
+					}
+					break;
+				case Protocol.GAME_JOIN_IN:
+					System.out.println("<ClientManager> Protocol.GAME_JOIN_IN");
+
+					// 해당하는 룸에 있는 참가자들에게 새로운 참여자가 왔음을 알린다.
+					for (ClientManager userInRoom : room.getUsersClientManager()) {
+						try {
+							pt.setStatus(Protocol.GAME_JOIN_PARTIPANT);
+							// 방에 있는 Client의 UserInfo Vector
+							pt.setUsersInRoom(room.getUsersInfo());
+							userInRoom.sendProtocol(pt);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+					System.out.println("<ClientManager> send GAME_JOIN_PARTIPANT");
+
+					updateUserListInLobby(); // UserList업데이트
 					break;
 				case Protocol.LOGOUT:
 					System.out.println("<ClientManager> Protocol.LOGOUT");

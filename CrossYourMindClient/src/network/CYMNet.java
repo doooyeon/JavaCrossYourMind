@@ -135,52 +135,48 @@ public class CYMNet {
 			@Override
 			public void run() {
 				while (true) {
-//					switch (netState) {
-//					case Home:
-//						System.out.println("<CYMNet> Enter Home");
-//					case Lobby:
-//					case Room:
-//						System.out.println("<CYMNet> Room 들어옴");
-//						System.out.println("<CYMNet> Enter Lobby");
-						try {
-							System.out.println("ois -> 1111");
-							ois = new ObjectInputStream(is);
-							System.out.println("ois -> 2222");
-							readObject = ois.readObject();
-							System.out.println("ois -> 3333");
+					// switch (netState) {
+					// case Home:
+					// System.out.println("<CYMNet> Enter Home");
+					// case Lobby:
+					// case Room:
+					// System.out.println("<CYMNet> Room 들어옴");
+					// System.out.println("<CYMNet> Enter Lobby");
+					try {
+						ois = new ObjectInputStream(is);
+						readObject = ois.readObject();
 
-							Protocol pt = (Protocol) readObject;
-							panel.receiveProtocol(pt);// 각 패널에서 받은 메세지 처리
-						} catch (IOException e) {
-							System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(IOException)");
-							// 서버와 소켓 통신에 문제가 생겼을 경우 소켓을 닫는다
-							try {
-								os.close();
-								is.close();
-								dos.close();
-								dis.close();
-								oos.close();
-								ois.close();
-								socket.close();
-								break; // 에러 발생하면 while문 종료
-							} catch (IOException e1) {
-							}
-							break;
-						} catch (ClassNotFoundException e) {
-							System.out
-									.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassNotFoundException)");
-							e.printStackTrace();
-							break;
-						} catch (ClassCastException e) {
-							System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassCastException)");
-							e.printStackTrace();
-							break;
-						} catch (NullPointerException e) {
-							System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(NullPointerException)");
-							e.printStackTrace();
-							break;
+						Protocol pt = (Protocol) readObject;
+						panel.receiveProtocol(pt);// 각 패널에서 받은 메세지 처리
+					} catch (IOException e) {
+						System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(IOException)");
+						// 서버와 소켓 통신에 문제가 생겼을 경우 소켓을 닫는다
+						try {
+							os.close();
+							is.close();
+							dos.close();
+							dis.close();
+							oos.close();
+							ois.close();
+							socket.close();
+							break; // 에러 발생하면 while문 종료
+						} catch (IOException e1) {
 						}
-					//}
+						break;
+					} catch (ClassNotFoundException e) {
+						System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassNotFoundException)");
+						e.printStackTrace();
+						break;
+					} catch (ClassCastException e) {
+						System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(ClassCastException)");
+						e.printStackTrace();
+						break;
+					} catch (NullPointerException e) {
+						System.out.println(String.valueOf(readObject) + " Protocol 수신 에러!!(NullPointerException)");
+						e.printStackTrace();
+						break;
+					}
+					// }
 				} // while문 끝
 			}// run메소드 끝
 		});// thread 정의 끝

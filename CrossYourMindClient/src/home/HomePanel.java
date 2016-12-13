@@ -207,10 +207,10 @@ public class HomePanel extends ReceiveJPanel {
 	public void receiveProtocol(Protocol pt) {
 		int status = pt.getStatus();
 		System.out.println("<HomePanel> receiveProtocol status: " + status);
-		
-		switch(status){
+
+		switch (status) {
 		case Protocol.HOME_SUCCESSLOGIN:
-			System.out.println("<HomePanel> Protocol.HOME_SUCCESSLOGIN");	
+			System.out.println("<HomePanel> Protocol.HOME_SUCCESSLOGIN");
 			userInfo = pt.getUserInfo();
 			// cymFrame.sequenceControl("lobbyPanel", arg0);
 			cymFrame.sequenceControl("lobbyPanel", 0);
