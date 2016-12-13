@@ -430,7 +430,10 @@ public class RoomPanel extends ReceiveJPanel {
 			System.out.println("<RoomPanel> GAME_START_FAIL_NOT_MASTER");
 			JOptionPane.showMessageDialog(cymFrame.getContentPane(), "You are not the game master!");
 			break;
-
+		case Protocol.GAME_TIMER_BROADCAST:
+			System.out.println("<RoomPanel> GAME_TIMER_BROADCAST");
+			timerBroadCasting();
+			break;
 		}
 	}
 
@@ -689,7 +692,25 @@ public class RoomPanel extends ReceiveJPanel {
 		}
 	}
 	
-	
+	/**
+	 * When the server notifies that 1 second elapsed If game is playing,
+	 * decrement the in-game timer If in-game timer becomes zero, notice the
+	 * server that the round ended
+	 */
+	public void timerBroadCasting() {
+		if (gameStarted) {
+			gameTime--;
+			timer.setText(String.valueOf(gameTime));
+			if (gameTime == 0) {
+				gameStarted = false;
+				if (isQuestioner) {
+					Protocol pt = new Protocol();
+					pt.setStatus(Protocol.GAME_DRAW_TIMER_EXPIRE);
+					cymNet.sendProtocol(pt);
+				}
+			}
+		}
+	}
 	//
 	// /**
 	// * Inform user that unable to start game because the user is not game
@@ -804,25 +825,7 @@ public class RoomPanel extends ReceiveJPanel {
 	// dialog.setVisible(true);
 	// }
 	//
-	// /**
-	// * When the server notifies that 1 second elapsed If game is playing,
-	// * decrement the in-game timer If in-game timer becomes zero, notice the
-	// * server that the round ended
-	// */
-	// public void timerBroadcasted() {
-	// if (gameStarted) {
-	// gameTime--;
-	// timer.setText(String.valueOf(gameTime));
-	// if (gameTime == 0) {
-	// gameStarted = false;
-	// if (isQuestioner) {
-	// ProgressInfo pi = new ProgressInfo();
-	// pi.set_status(ProgressInfo.TIMER_EXPIRE);
-	// GamePanel.this.cymFrame.sendProtocol(pi);
-	// }
-	// }
-	// }
-	// }
+
 	//
 	// /* Get methods */
 	// public Color get_drawColor() {

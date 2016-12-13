@@ -54,6 +54,7 @@ public class Protocol implements Serializable {
 	public static final int GAME_DRAW_SELECT_COLOR_BROADCAST = 318;
 	public static final int GAME_DRAW_TIMER_EXPIRE = 319;
 	public static final int GAME_DRAW_TIMER_EXPIRE_BROADCAST = 320;
+	public static final int GAME_TIMER_BROADCAST = 324;
 
 	public static final int GAME_LOGOUT = 399;
 

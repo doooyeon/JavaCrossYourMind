@@ -2,6 +2,8 @@ package main;
 
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -19,6 +21,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
+import javax.swing.Timer;
 
 import info.RoomInfo;
 import info.UserInfo;
@@ -64,9 +67,44 @@ public class ClientManager extends Thread {
 		this.playerNo = playerNo;
 
 		this.userInfo = new UserInfo();
+		
+		//게임을 실행하는 데 필요한 timerBroadcast
+		ActionListener action = new ActionListener() {
+	         public void actionPerformed(ActionEvent e) {
+	            timerBroadcast();
+	         }
+	      };
+	      try {
+	         Timer gametimer = new Timer(2000, action);
+	         gametimer.setRepeats(true);
+	         gametimer.start();
+	      } catch (Exception e) {
+	         e.printStackTrace();
+	      }
 
 		UserNetwork();
 		initWordList();
+	}
+
+	/** 모든 클라이언트에게 1초가 지났음을 알리는 메소드 */
+	public void timerBroadcast() {
+		Protocol pt = new Protocol();
+		pt.setStatus(Protocol.GAME_TIMER_BROADCAST);
+
+//		for (ClientManager users : server.users) {
+//			try {
+//				users.sendProtocol(pt);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+		for (ClientManager users : users) {
+			try {
+				users.sendProtocol(pt);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/** 스트림 생성 메소드 */
