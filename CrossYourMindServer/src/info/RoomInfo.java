@@ -5,9 +5,9 @@ import java.util.Vector;
 import main.ClientManager;
 
 public class RoomInfo {
-	public static final int ROOM_INIT = 600;
-	public static final int ROOM_WAITNG = 601;
-	public static final int ROOM_PLAYING = 602;
+	public static final int ROOM_INIT = 601;
+	public static final int ROOM_WAITNG = 602;
+	public static final int ROOM_PLAYING = 603;
 	public static final int ROOM_ROUND_NUM = 4; // 총 진행 라운드
 
 	private Vector<ClientManager> users; // 같은 방에 있는 사용자들

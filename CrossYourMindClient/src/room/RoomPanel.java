@@ -1,9 +1,12 @@
 package room;
 
+import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -11,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -74,9 +78,6 @@ public class RoomPanel extends ReceiveJPanel {
 	private boolean gameStarted; // 게임이 시작되었는지
 	private boolean isQuestioner; // 질문자
 	private long gameTime; // 게임진행시간
-
-	private Thread thread;
-	// private int k = 0;
 
 	/** RoomPanel Construction */
 	public RoomPanel(CYMFrame cymFrame) {
@@ -404,24 +405,24 @@ public class RoomPanel extends ReceiveJPanel {
 			System.out.println("<RoomPanel> GAME_CHAT_UPDATE");
 			gameChatUpdate(pt);
 			break;
-//		case Protocol.GAME_START_SUCCESS_QUESTIONER:
-//			System.out.println("<RoomPanel> GAME_START_SUCCESS_QUESTIONER");
+		 case Protocol.GAME_START_SUCCESS_QUESTIONER:
+		 System.out.println("<RoomPanel> GAME_START_SUCCESS_QUESTIONER");
+		 canvas.repaint();
+		 gameStarted(pt);
+		 quetionerBorder(pt);
+		 break;
+		 case Protocol.GAME_START_SUCCESS_ANSWER:
+		 System.out.println("<RoomPanel> GAME_START_SUCCESS_ANSWER");
+		 canvas.repaint();
+		 gameStarted(pt);
+		 quetionerBorder(pt);
+		 break;
+//		case Protocol.GAME_START_SUCCESS:
+//			System.out.println("<RoomPanel> GAME_START_SUCCESS");
 //			canvas.repaint();
 //			gameStarted(pt);
 //			quetionerBorder(pt);
 //			break;
-//		case Protocol.GAME_START_SUCCESS_ANSWER:
-//			System.out.println("<RoomPanel> GAME_START_SUCCESS_ANSWER");
-//			canvas.repaint();
-//			gameStarted(pt);
-//			quetionerBorder(pt);
-//			break;
-		case Protocol.GAME_START_SUCCESS:
-			System.out.println("<RoomPanel> GAME_START_SUCCESS");
-			canvas.repaint();
-			gameStarted(pt);
-			quetionerBorder(pt);
-			break;
 		case Protocol.GAME_START_FAIL_LACK_USER:
 			System.out.println("<RoomPanel> GAME_START_FAIL_LACK_USER");
 			JOptionPane.showMessageDialog(cymFrame.getContentPane(), "You need at least two players!");
@@ -433,6 +434,26 @@ public class RoomPanel extends ReceiveJPanel {
 		case Protocol.GAME_TIMER_BROADCAST:
 			System.out.println("<RoomPanel> GAME_TIMER_BROADCAST");
 			timerBroadCasting();
+			break;
+		case Protocol.GAME_DRAW_BROADCAST:
+			System.out.println("<RoomPanel> GAME_DRAW_BROADCAST");
+			drawBroadcasted(pt);
+			break;
+		case Protocol.GAME_DRAW_ALLCLEAR_BROADCAST:
+			System.out.println("<RoomPanel> GAME_DRAW_ALLCLEAR_BROADCAST");
+			canvas.repaint();
+			break;
+		case Protocol.GAME_DRAW_ERASER_BROADCAST:
+			System.out.println("<RoomPanel> GAME_DRAW_ERASER_BROADCAST");
+			eraserBroadcasted();
+			break;
+		case Protocol.GAME_DRAW_SELECT_COLOR_BROADCAST:
+			System.out.println("<RoomPanel> GAME_DRAW_SELECT_COLOR_BROADCAST");
+			colorBroadcasted(pt);
+			break;
+		case Protocol.GAME_ROUND_TERMINATE:
+			System.out.println("<RoomPanel> GAME_ROUND_TERMINATE");
+			roundTerminated();
 			break;
 		}
 	}
@@ -676,7 +697,7 @@ public class RoomPanel extends ReceiveJPanel {
 	/** 질문자를 검은색 border로 표시하는 메소드 */
 	public void quetionerBorder(Protocol pt) {
 		System.out.println("<RoomPanel> call quetionerBorder");
-		
+
 		String questioner = pt.getUserInfo().getMyNickname();
 		int size = usersList.size();
 
@@ -691,11 +712,11 @@ public class RoomPanel extends ReceiveJPanel {
 			}
 		}
 	}
-	
+
 	/**
-	 * When the server notifies that 1 second elapsed If game is playing,
-	 * decrement the in-game timer If in-game timer becomes zero, notice the
-	 * server that the round ended
+	 * 확인!!!!!!! When the server notifies that 1 second elapsed If game is
+	 * playing, decrement the in-game timer If in-game timer becomes zero,
+	 * notice the server that the round ended
 	 */
 	public void timerBroadCasting() {
 		if (gameStarted) {
@@ -711,169 +732,150 @@ public class RoomPanel extends ReceiveJPanel {
 			}
 		}
 	}
-	//
-	// /**
-	// * Inform user that unable to start game because the user is not game
-	// master
-	// */
-	// public void startDeniedMaster() {
-	// JOptionPane.showMessageDialog(GamePanel.this.cymFrame.getContentPane(),
-	// "You are not the game master!");
-	// }
-	//
-	// /**
-	// * Inform user that unable to start game because there is not enough
-	// player
-	// */
-	// public void startDeniedNum() {
-	// JOptionPane.showMessageDialog(GamePanel.this.cymFrame.getContentPane(),
-	// "You need at least two players!");
-	// }
-	//
 
-	// /**
-	// * Draw the canvas with point list, selected color
-	// *
-	// * @param list
-	// * of points drawn by questioner
-	// */
-	// public void drawBroadcasted(ArrayList<UserPoint> pList) {
-	// Graphics g = canvas.getGraphics();
-	// Graphics2D g2 = (Graphics2D) g;
-	//
-	// for (UserPoint p : pList) {
-	// System.out.println("<GamePanel> drawColor: " + drawColor);
-	// g2.setColor(drawColor);
-	// g2.setStroke(new BasicStroke(5));
-	// // g.setColor(drawColor);
-	//
-	// newPoint = p;
-	//
-	// if (newPoint == null) {
-	// newPoint = oldPoint;
-	// }
-	// if (oldPoint == null) {
-	// oldPoint = p;
-	// }
-	//
-	// // g.drawLine(p1.get_pointX(), p1.get_pointY(), p2.get_pointX(),
-	// // p2.get_pointY());
-	//
-	// System.out.println(newPoint.get_pointX() + ", " + newPoint.get_pointY());
-	// System.out.println(oldPoint.get_pointX() + ", " + oldPoint.get_pointY());
-	// g2.draw(new Line2D.Float(oldPoint.get_pointX(), oldPoint.get_pointY(),
-	// newPoint.get_pointX(),
-	// newPoint.get_pointY()));
-	//
-	// oldPoint = p;
-	// }
-	// }
-	//
-	// /** Clear the canvas */
-	// public void clearBroadcasted() {
-	// canvas.repaint();
-	// }
-	//
-	// /**
-	// * Questioner selected eraser. Set the color as white and set the eraser
-	// * thickness
-	// */
-	// public void eraserBroadcasted() {
-	// set_drawColor(6);
-	// set_drawThick(25);
-	// }
-	//
-	// /**
-	// * Questioner selected color. Set the color as selected
-	// *
-	// * @param index
-	// * of selected color
-	// */
-	// public void colorBroadcasted(int drawingColor) {
-	// set_drawColor(drawingColor);
-	// set_drawThick(10);
-	// }
-	//
-	
+	/** 받은 PointList를 이용하여 canvas에 그리는 메소드 */
+	public void drawBroadcasted(Protocol pt) {
+		ArrayList<Point> pList = pt.getPointList();
 
-	// /**
-	// * Redraw all the panel as waiting state (not started)
-	// *
-	// * @param message
-	// * noticing that the game ended
-	// */
-	// public void roundTerminated(String message) {
-	// gameStarted = false;
-	// final JOptionPane optionPane = new JOptionPane(message,
-	// JOptionPane.INFORMATION_MESSAGE,
-	// JOptionPane.DEFAULT_OPTION, null, new Object[] {}, null);
-	// final JDialog dialog = new JDialog();
-	// dialog.setTitle("");
-	// dialog.setModal(true);
-	// dialog.setContentPane(optionPane);
-	// dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-	// dialog.pack();
-	// ActionListener action = new ActionListener() {
-	// public void actionPerformed(ActionEvent e) {
-	// dialog.dispose();
-	// updatePanel();
-	// }
-	// };
-	// Timer timer = new Timer(4000, action);
-	// timer.setRepeats(false);
-	// timer.start();
-	// dialog.setVisible(true);
-	// }
-	//
+		Graphics g = canvas.getGraphics();
+		Graphics2D g2 = (Graphics2D) g;
 
-	//
-	// /* Get methods */
-	// public Color get_drawColor() {
-	// return drawColor;
-	// }
-	//
-	// public int get_drawThick() {
-	// return drawThick;
-	// }
-	//
-	// /* Set methods */
-	// public void set_drawThick(int item) {
-	// drawThick = item;
-	// }
-	//
-	// public void set_drawColor(int option) {
-	// switch (option) {
-	// case 0: {
-	// drawColor = Color.black;
-	// break;
-	// }
-	// case 1: {
-	// drawColor = Color.red;
-	// break;
-	// }
-	// case 2: {
-	// drawColor = Color.yellow;
-	// break;
-	// }
-	// case 3: {
-	// drawColor = Color.green;
-	// break;
-	// }
-	// case 4: {
-	// drawColor = Color.blue;
-	// break;
-	// }
-	// case 5: {
-	// drawColor = new Color(128, 0, 128);
-	// break;
-	// }
-	// case 6: {
-	// drawColor = Color.white;
-	// break;
-	// }
-	// }
-	// }
-	//
-	//
+		for (Point p : pList) {
+			System.out.println("<GamePanel> drawColor: " + drawColor);
+			g2.setColor(drawColor);
+			// System.out.println("<GamePanel> drawWidth : " + drawWidth);
+			// g2.setStroke(new BasicStroke(pt.getdrawWidth()));
+			g2.setStroke(new BasicStroke(5));
+
+			newPoint = p;
+
+			if (newPoint == null) {
+				newPoint = oldPoint;
+			}
+			if (oldPoint == null) {
+				oldPoint = p;
+			}
+
+			System.out.println(newPoint.x + ", " + newPoint.y);
+			System.out.println(oldPoint.x + ", " + oldPoint.y);
+			g2.draw(new Line2D.Float(oldPoint.x, oldPoint.y, newPoint.x, newPoint.y));
+
+			oldPoint = p;
+		}
+	}
+
+	/** 지우개의 색과 굵기를 세팅하는 메소드 */
+	public void eraserBroadcasted() {
+		setDrawColor(6);
+		setDrawThick(25);
+	}
+
+	/** 선택한 색과 굵기를 세팅하는 메소드 */
+	public void colorBroadcasted(Protocol pt) {
+		int drawingColor = pt.getDrawColor();
+
+		setDrawColor(drawingColor);
+		setDrawThick(10);
+	}
+
+	/**
+	 * 정리!!!!!!!!!!! round가 모두 끝난 후에 우승자 다이얼로그를 띄우는 메소드
+	 */
+	public void roundTerminated() {
+		System.out.println("<RoomPanel> call roundTerminated drawColor: " + drawColor);
+		drawColor = Color.BLACK;
+		// drawWidth = 3;
+		gameStarted = false;
+		isQuestioner = false;
+
+		// Update display of score for target user
+		int highScore = Integer.parseInt(userScore[0].getText());
+		String winner = userNickname[0].getText();
+
+		for (int i = 1; i < userScore.length; i++) {
+			if (!userScore[i].getText().equals("")) {
+				if (highScore < Integer.parseInt(userScore[i].getText())) {
+					highScore = Integer.parseInt(userScore[i].getText());
+					winner = userNickname[i].getText();
+				}
+			}
+		}
+
+		String message = "Winner is " + winner + "!";
+		showDialog(message, 4000);
+	}
+
+	/** RoomPanel에서 다이얼로그를 띄어주는 메소드 */
+	public void showDialog(String message, int stayDiagTime) {
+		final JOptionPane optionPane = new JOptionPane(message, JOptionPane.INFORMATION_MESSAGE,
+				JOptionPane.DEFAULT_OPTION, null, new Object[] {}, null);
+		final JDialog dialog = new JDialog();
+		dialog.setTitle("");
+		dialog.setModal(true);
+		dialog.setContentPane(optionPane);
+		dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		dialog.pack();
+		Dimension frameSize = getSize();
+		Dimension windowSize = Toolkit.getDefaultToolkit().getScreenSize();
+		dialog.setLocation((windowSize.width - frameSize.width) / 2, (windowSize.height - frameSize.height) / 2);
+
+		ActionListener action = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dialog.dispose();
+				updateGameEWPanel();
+			}
+		};
+		Timer timer = new Timer(stayDiagTime, action);
+		timer.setRepeats(false);
+		timer.start();
+		dialog.setVisible(true);
+	}
+
+	/* getter */
+	public Color getDrawColor() {
+		return drawColor;
+	}
+
+	public int getDrawThick() {
+		return drawThick;
+	}
+
+	/* setter */
+	public void setDrawThick(int drawThick) {
+		this.drawThick = drawThick;
+	}
+
+	public void setDrawColor(int colorNum) {
+		switch (colorNum) {
+		case 0: {
+			drawColor = Color.black;
+			break;
+		}
+		case 1: {
+			drawColor = Color.red;
+			break;
+		}
+		case 2: {
+			drawColor = Color.yellow;
+			break;
+		}
+		case 3: {
+			drawColor = Color.green;
+			break;
+		}
+		case 4: {
+			drawColor = Color.blue;
+			break;
+		}
+		case 5: {
+			drawColor = Color.magenta;
+			break;
+		}
+		case 6: {
+			drawColor = Color.white;
+			break;
+		}
+		}
+	}
 
 }

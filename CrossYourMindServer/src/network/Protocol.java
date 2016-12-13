@@ -45,7 +45,12 @@ public class Protocol implements Serializable {
 	public static final int GAME_START_SUCCESS = 323;
 	public static final int GAME_START_SUCCESS_QUESTIONER = 321;
 	public static final int GAME_START_SUCCESS_ANSWER = 322;
+	public static final int GAME_TIMER_BROADCAST = 324;
+	public static final int GAME_ROUND_TERMINATE = 325;
+
+	// in gamePanel for drawing
 	public static final int GAME_DRAW = 312;
+	public static final int GAME_DRAW_BROADCAST = 326;
 	public static final int GAME_DRAW_ALLCLEAR = 313;
 	public static final int GAME_DRAW_ALLCLEAR_BROADCAST = 314;
 	public static final int GAME_DRAW_ERASER = 315;
@@ -54,7 +59,6 @@ public class Protocol implements Serializable {
 	public static final int GAME_DRAW_SELECT_COLOR_BROADCAST = 318;
 	public static final int GAME_DRAW_TIMER_EXPIRE = 319;
 	public static final int GAME_DRAW_TIMER_EXPIRE_BROADCAST = 320;
-	public static final int GAME_TIMER_BROADCAST = 324;
 
 	public static final int GAME_LOGOUT = 399;
 

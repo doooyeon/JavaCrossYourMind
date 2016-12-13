@@ -37,30 +37,36 @@ public class Protocol implements Serializable {
 	public static final int GAME_JOIN_IN = 303;
 	public static final int GAME_JOIN_PARTIPANT = 304;
 	public static final int GAME_CHAT_MSG = 305;
-	public static final int GAME_CORRECT_ANSWER = 307;
-	public static final int GAME_CHAT_UPDATE = 308;
-	public static final int GAME_START = 309;
-	public static final int GAME_START_FAIL_LACK_USER = 310;
-	public static final int GAME_START_FAIL_NOT_MASTER = 311;
-	public static final int GAME_START_SUCCESS = 323;
-	public static final int GAME_START_SUCCESS_QUESTIONER = 321;
-	public static final int GAME_START_SUCCESS_ANSWER = 322;
-	public static final int GAME_DRAW = 312;
-	public static final int GAME_DRAW_ALLCLEAR = 313;
-	public static final int GAME_DRAW_ALLCLEAR_BROADCAST = 314;
-	public static final int GAME_DRAW_ERASER = 315;
-	public static final int GAME_DRAW_ERASER_BROADCAST = 316;
-	public static final int GAME_DRAW_SELECT_COLOR = 317;
-	public static final int GAME_DRAW_SELECT_COLOR_BROADCAST = 318;
-	public static final int GAME_DRAW_TIMER_EXPIRE = 319;
-	public static final int GAME_DRAW_TIMER_EXPIRE_BROADCAST = 320;
-	public static final int GAME_TIMER_BROADCAST = 324;
+	public static final int GAME_CORRECT_ANSWER = 306;
+	public static final int GAME_CHAT_UPDATE = 307;
+	public static final int GAME_START = 308;
+	public static final int GAME_START_FAIL_LACK_USER = 309;
+	public static final int GAME_START_FAIL_NOT_MASTER = 310;
+	public static final int GAME_START_SUCCESS = 311;
+	public static final int GAME_START_SUCCESS_QUESTIONER = 312;
+	public static final int GAME_START_SUCCESS_ANSWER = 313;
+	public static final int GAME_TIMER_BROADCAST = 314;
+	public static final int GAME_ROUND_TERMINATE = 315;
 
-	public static final int GAME_LOGOUT = 399;
+	// in gamePanel for drawing
+	public static final int GAME_DRAW = 401;
+	public static final int GAME_DRAW_BROADCAST = 402;
+	public static final int GAME_DRAW_ALLCLEAR = 403;
+	public static final int GAME_DRAW_ALLCLEAR_BROADCAST = 404;
+	public static final int GAME_DRAW_ERASER = 405;
+	public static final int GAME_DRAW_ERASER_BROADCAST = 406;
+	public static final int GAME_DRAW_SELECT_COLOR = 407;
+	public static final int GAME_DRAW_SELECT_COLOR_BROADCAST = 408;
+	public static final int GAME_DRAW_TIMER_EXPIRE = 409;
+	public static final int GAME_DRAW_TIMER_EXPIRE_BROADCAST = 410;
 
-	// public static final int START = 401;
-	public static final int EXIT = 402; // 윈도우창닫기
+	public static final int GAME_LOGOUT = 499;
 
+	public static final int EXIT = 599; // 윈도우창닫기
+
+	/* RoomInfo 600~ */
+	/* UserInfo 700~ */
+	
 	/* FIELD */
 	private int status = 0;
 	private UserInfo userInfo;
