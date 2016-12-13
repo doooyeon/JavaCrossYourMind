@@ -193,7 +193,7 @@ public class HomePanel extends ReceiveJPanel {
 
 			// LOGIN 프로토콜 전송
 			Protocol pt = new Protocol();
-			pt.setStatus(Protocol.LOGIN);
+			pt.setStatus(Protocol.HOME_LOGIN);
 			pt.setUserInfo(userInfo);
 			cymNet.sendProtocol(pt);
 
@@ -207,7 +207,7 @@ public class HomePanel extends ReceiveJPanel {
 		int status = pt.getStatus();
 		System.out.println("<HomePanel> receiveProtocol status: " + status);
 
-		if (status == Protocol.SUCCESSLOGIN) {
+		if (status == Protocol.HOME_SUCCESSLOGIN) {
 			userInfo = pt.getUserInfo();
 			// cymFrame.sequenceControl("lobbyPanel", arg0);
 			cymFrame.sequenceControl("lobbyPanel", 0);

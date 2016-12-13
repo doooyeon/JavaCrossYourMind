@@ -19,6 +19,7 @@ import java.util.Vector;
 import javax.swing.ImageIcon;
 
 import info.RoomInfo;
+import info.UserInfo;
 import network.Protocol;
 
 public class ClientManager extends Thread {
@@ -40,14 +41,13 @@ public class ClientManager extends Thread {
 	private ObjectInputStream ois;
 	private Socket user_socket;
 
-	// for network userinfo
+	// for
 	private RoomInfo room = null;
-
+	private UserInfo userInfo;
 	private Vector<ClientManager> users;
 	private int playerNo;
 
-	// for private userinfo
-	private String userID;
+	// for
 	private NETSTATE netState = NETSTATE.Home;
 	private Object readObject;
 
@@ -58,6 +58,8 @@ public class ClientManager extends Thread {
 		this.user_socket = soc;
 		this.users = vc;
 		this.playerNo = playerNo;
+
+		this.userInfo = new UserInfo();
 
 		UserNetwork();
 	}
@@ -173,48 +175,82 @@ public class ClientManager extends Thread {
 				server.textArea.append("프로토콜 수신 번호 : " + pt.getStatus() + "\n");
 				switch (pt.getStatus()) {
 
-				case Protocol.LOGIN:
-					pt.setStatus(Protocol.SUCCESSLOGIN);
+				case Protocol.HOME_LOGIN:
+					System.out.println("<ClientManager> Protocol.LOGIN");
+					pt.setStatus(Protocol.HOME_SUCCESSLOGIN);
 					pt.setRoomSize(server.rooms.size()); // 만들어져 있는 방의 개수 세팅
 					sendProtocol(pt);
 					System.out.println("<ClientManager> send SUCCESSLOGIN");
-					netState = NETSTATE.Lobby;
-					userID = pt.getUserInfo().getMyNickname();
-					
+					netState = NETSTATE.Lobby; // 로비로 이동
+					userInfo.setMyNickname(pt.getUserInfo().getMyNickname());
+
 					updateGameListInLobby(); // GameList업데이트
 					updateUserListInLobby(); // UserList업데이트
-					
+
 					break;
-				case Protocol.MSG:
+				case Protocol.LOBBY_CHAT_MSG:
+					System.out.println("<ClientManager> Protocol.MSG");
 					broadCastProtocol(pt);
 					break;
-				case Protocol.IMAGE:
+				case Protocol.LOBBY_CHAT_IMAGE:
+					System.out.println("<ClientManager> Protocol.IMAGE");
 					receiveFile(pt.getSendFileName(), pt.getSendFileSize());
 					broadCastProtocol(pt);
 					broadCastImage(pt.getSendFileName());
 					break;
-				case Protocol.FILE:
+				case Protocol.LOBBY_CHAT_FILE:
+					System.out.println("<ClientManager> Protocol.FILE");
 					receiveFile(pt.getSendFileName(), pt.getSendFileSize());
 					broadCastProtocol(pt);
 					break;
-				case Protocol.FILESAVE:
+				case Protocol.LOBBY_CHAT_FILESAVE:
+					System.out.println("<ClientManager> Protocol.FILESAVE");
 					File sendFile = new File(receiveFilePath + "/" + pt.getSendFileName()); // 파일
 																							// 생성
 					long fileSize = (int) sendFile.length(); // 파일 크기 받아오기
-					pt.setStatus(Protocol.FILESEND);
+					pt.setStatus(Protocol.LOBBY_CHAT_FILESEND);
 					pt.setSendFileSize(fileSize);
 					sendProtocol(pt);
+					System.out.println("<ClientManager> send FILESEND");
+
 					sendFile(sendFile, fileSize);
 					break;
-					// else if (splitMsg[0].equals("/LOGOUT")) {
-					// System.out.println("로그아웃!");
-					// netState = NETSTATE.Home;
-					// }
-					// break;
-					//
-					// case Room:
-					// break;
-					// }
+				// else if (splitMsg[0].equals("/LOGOUT")) {
+				// System.out.println("로그아웃!");
+				// netState = NETSTATE.Home;
+				// }
+				// break;
+				//
+				// case Room:
+				// break;
+				// }
+				case Protocol.LOBBY_CREATE_ROOM:
+					System.out.println("<ClientManager> Protocol.CREATE_ROOM");
+					String roomName = pt.getRoomName(); // 사용자가 입력한 방이름
+
+					if (server.checkDuplicateRoomName(roomName)) {
+						pt.setStatus(Protocol.LOBBY_CREATE_ROOM_FAIL);
+						sendProtocol(pt);
+						System.out.println("<ClientManager> send CREATE_ROOM_DENIED");
+					} else {
+						updateGameListInLobby(); // GameList업데이트
+
+						netState = NETSTATE.Room;
+						room = new RoomInfo(roomName); // 새로운 방 생성
+						userInfo.setIsMaster(true); // 주인장으로 표시
+
+						server.addRoom(room); // 방을 벡터에 추가
+						server.addUserToRoom(this, roomName); // Client를 방에 추가
+
+						pt.setStatus(Protocol.LOBBY_CREATE_ROOM_SUCCESS);
+						pt.setUsersInRoom(room.getUsersInfo()); // 방에 있는 Client의
+																// UserInfo
+																// Vector
+						sendProtocol(pt);
+						System.out.println("<ClientManager> send CREATE_ROOM_SUCCESS");
+
+						updateUserListInLobby(); // UserList업데이트
+					}
 				}
 			} catch (IOException e) {
 				try {
@@ -253,7 +289,7 @@ public class ClientManager extends Thread {
 
 			// 프로토콜 전송
 			Protocol pt = new Protocol();
-			pt.setStatus(Protocol.UPDATE_USER_LIST);
+			pt.setStatus(Protocol.LOBBY_UPDATE_USER_LIST);
 			pt.setUserList(setUserListNameInLobby());
 
 			// in Lobby 체크?
@@ -265,12 +301,13 @@ public class ClientManager extends Thread {
 	public Vector<String> setUserListNameInLobby() {
 		int listSize = server.users.size();
 		System.out.println("listSize: " + listSize);
-		
+
 		Vector<String> userListName = new Vector<String>();
 
 		for (int i = 0; i < listSize; i++) {
 			// in Lobby, ""이 아닌 닉네임만
-			if (server.users.get(i).getNetState() == NETSTATE.Lobby && !(server.users.get(i).getNickName()).equals("")) {
+			if (server.users.get(i).getNetState() == NETSTATE.Lobby
+					&& !(server.users.get(i).getNickName()).equals("")) {
 				userListName.add(server.users.get(i).getNickName());
 			}
 		}
@@ -284,7 +321,7 @@ public class ClientManager extends Thread {
 
 			// 프로토콜 전송
 			Protocol pt = new Protocol();
-			pt.setStatus(Protocol.UPDATE_GAME_LIST);
+			pt.setStatus(Protocol.LOBBY_UPDATE_GAME_LIST);
 			pt.setGameList(setGameListNameInLobby());
 
 			// in Lobby 체크?
@@ -359,7 +396,11 @@ public class ClientManager extends Thread {
 	}
 
 	public String getNickName() {
-		return userID;
+		return userInfo.getMyNickname();
+	}
+
+	public UserInfo getUserInfo() {
+		return userInfo;
 	}
 
 	/* setter */
@@ -369,5 +410,9 @@ public class ClientManager extends Thread {
 
 	public void setRoom(RoomInfo room) {
 		this.room = room;
+	}
+
+	public void setUserInfo(UserInfo userInfo) {
+		this.userInfo = userInfo;
 	}
 }

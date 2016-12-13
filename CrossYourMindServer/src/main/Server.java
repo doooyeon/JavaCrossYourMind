@@ -19,7 +19,7 @@ import info.RoomInfo;
 
 public class Server extends JFrame {
 	private static final int PORT = 30000;
-	
+
 	// for GUI
 	private JPanel contentPane;
 	private JButton startBtn; // 서버를 실행시킨 버튼
@@ -28,11 +28,12 @@ public class Server extends JFrame {
 	// for connection
 	private ServerSocket socket; // 서버소켓
 	private Socket soc; // 연결소켓
-	
+
 	// for manage users, rooms -> default
 	int playerCnt = 0;
-	Vector<RoomInfo> rooms  = new Vector<RoomInfo>(); // 생성된 방들을 저장할 벡터
-	Vector<ClientManager> users = new Vector<ClientManager>(); // 접속한 사용자들을 저장할 벡터
+	Vector<RoomInfo> rooms = new Vector<RoomInfo>(); // 생성된 방들을 저장할 벡터
+	Vector<ClientManager> users = new Vector<ClientManager>(); // 접속한 사용자들을 저장할
+																// 벡터
 
 	/** SERVR construction */
 	public Server() {
@@ -64,9 +65,9 @@ public class Server extends JFrame {
 		contentPane.add(startBtn);
 		textArea.setEditable(false); // textArea를 사용자가 수정 못하게끔 막는다.
 	}
-	
+
 	/** SERVER socket을 여는 액션 이벤트 처리하는 내부 클래스 */
-	class Myaction implements ActionListener { 
+	class Myaction implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			// 액션 이벤트가 sendBtn일때 또는 textField 에세 Enter key 치면
@@ -74,7 +75,7 @@ public class Server extends JFrame {
 				server_start();
 		}
 	}
-		
+
 	/** 서버가 소켓을 여는 메소드 */
 	private void server_start() {
 		try {
@@ -99,8 +100,8 @@ public class Server extends JFrame {
 					try {
 						textArea.append("사용자 접속 대기중...\n");
 						soc = socket.accept(); // accept가 일어나기 전까지는 무한 대기중
-						playerCnt++; //접속자 수를 증가시킨다.
-						
+						playerCnt++; // 접속자 수를 증가시킨다.
+
 						textArea.append("사용자 접속!!\n");
 						ClientManager user = new ClientManager(soc, users, playerCnt, Server.this);
 						users.add(user); // 해당 벡터에 사용자 객체를 추가
@@ -113,15 +114,39 @@ public class Server extends JFrame {
 		});
 		th.start();
 	}
-	
+
+	/** Users 로그인하려는 이름이 중복되는지 확인하는 메소드 */
+	public boolean checkDuplicateUserName(String nickName) {
+		for (ClientManager clientManager : users) {
+			if (clientManager.getNickName().equals(nickName)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Room 생성한 방을 벡터에 추가하는 메소드 */
-	void addRoom(RoomInfo room) {
+	public void addRoom(RoomInfo room) {
 		this.rooms.add(room);
 	}
-	
+
 	/** Room Client를 방에 추가하는 메소드 */
-	void addUserToRoom(ClientManager clientManager, int roomIdx) {	
-		rooms.get(roomIdx).addUser(clientManager);
+	public void addUserToRoom(ClientManager clientManager, String roomName) {
+		for(RoomInfo roomInfo : rooms){
+			if(roomInfo.getRoomName().equals(roomName)){
+				roomInfo.addUser(clientManager);
+			}
+		}
+	}
+
+	/** Room 생성한 방의 이름이 중복되는지 확인하는 메소드 */
+	public boolean checkDuplicateRoomName(String roomName) {
+		for (RoomInfo roomInfo : rooms) {
+			if (roomInfo.getRoomName().equals(roomName)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static void main(String[] args) {

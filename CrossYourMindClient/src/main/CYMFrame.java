@@ -55,7 +55,7 @@ public class CYMFrame extends JFrame {
 
 		homePanel = new HomePanel(this);
 		lobbyPanel = new LobbyPanel(this);
-		// roomPanel = new RoomPanel(this);
+		roomPanel = new RoomPanel(this);
 		cymNet.setHomePanel(homePanel);
 		cymNet.setLobbyPanel(lobbyPanel);
 		cymNet.setRoomPanel(roomPanel);
@@ -65,7 +65,7 @@ public class CYMFrame extends JFrame {
 		contentPane = this.getContentPane();
 		contentPane.add("homePanel", homePanel);
 		contentPane.add("lobbyPanel", lobbyPanel);
-		// contentPane.add("roomPanel", roomPanel);
+		contentPane.add("roomPanel", roomPanel);
 
 		setVisible(true);
 		sequenceControl("homePanel", 0);

@@ -1,14 +1,16 @@
 package lobby;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -76,18 +78,18 @@ public class LobbyPanel extends ReceiveJPanel {
 		userInfo = cymFrame.getUserInfo();
 		cymNet = cymFrame.getCYMNet();
 
-		// initCreateDialog();
+		initCreateDialog();
 		setPanel();
 		setEvent();
 	}
 
 	public void initCreateDialog() {
-		// createDialog = new JDialog();
-		// CreateDialog cd = new CreateDialog(this);
-		// createDialog.setContentPane(cd);
-		// createDialog.setBounds(400, 300, 350, 150);
-		// createDialog.setResizable(false);
-		// createDialog.setVisible(false);
+		createDialog = new JDialog();
+		CreateDialog cd = new CreateDialog(this);
+		createDialog.setContentPane(cd);
+		createDialog.setBounds(400, 300, 350, 150);
+		createDialog.setResizable(false);
+		createDialog.setVisible(false);
 	}
 
 	/** for GUI */
@@ -226,7 +228,7 @@ public class LobbyPanel extends ReceiveJPanel {
 
 					// 프로토콜 전송
 					Protocol pt = new Protocol();
-					pt.setStatus(Protocol.MSG);
+					pt.setStatus(Protocol.LOBBY_CHAT_MSG);
 					pt.setUserInfo(userInfo);
 					System.out.println("<LobbyPanel> userInfo charPath: " + userInfo.getMyChatImagePath());
 					pt.setLobbyChatSentence(lobbyChatSentence);
@@ -255,7 +257,7 @@ public class LobbyPanel extends ReceiveJPanel {
 				String filePath = chooser.getSelectedFile().getPath();
 				// fileSend(filePath, "/IMAGE;");
 				// 프로토콜 전송
-				fileSend(filePath, Protocol.IMAGE);
+				fileSend(filePath, Protocol.LOBBY_CHAT_IMAGE);
 			}
 		});
 
@@ -275,23 +277,22 @@ public class LobbyPanel extends ReceiveJPanel {
 				String filePath = chooser.getSelectedFile().getPath();
 				// fileSend(filePath, "/FILE;");
 				// 프로토콜 전송
-				fileSend(filePath, Protocol.FILE);
+				fileSend(filePath, Protocol.LOBBY_CHAT_FILE);
 			}
 		});
 
 		// create button 이벤트 (to create a new game)
-		// createButton.addActionListener(new ActionListener() {
-		// public void actionPerformed(ActionEvent e) {
-		// showCreateDialog();
-		// }
-		// });
+		createButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				createDialog.setVisible(true);
+			}
+		});
 
 		// back button 이벤트 (to go the entry panel)
 		backButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ChattingPane.setText("");
 				cymFrame.sequenceControl("homePanel", 0);
-				// cymNet.sendMSG("/LOGOUT");
 				// 프로토콜 전송
 				Protocol pt = new Protocol();
 				pt.setStatus(Protocol.LOGOUT);
@@ -490,7 +491,6 @@ public class LobbyPanel extends ReceiveJPanel {
 		JLabel resizingImageLabel = new JLabel(receiveResizingImage);
 		resizingImageLabel.addMouseListener(new MyImageClickListener(receiveOriginalImage)); // 리사이징이미지
 																								// 리스너
-																								// 설정
 		appendComponent(resizingImageLabel);
 		setSaveBtnListener(pt.getSendFileName());
 
@@ -537,19 +537,19 @@ public class LobbyPanel extends ReceiveJPanel {
 	public void receiveProtocol(Protocol pt) {
 		System.out.println("<LobbyPanel> receiveProtocol");
 		switch (pt.getStatus()) {
-		case Protocol.MSG:
+		case Protocol.LOBBY_CHAT_MSG:
 			System.out.println("<LobbyPanel> Protocol.MSG");
 			appendMessage(pt);
 			break;
-		case Protocol.IMAGE:
+		case Protocol.LOBBY_CHAT_IMAGE:
 			System.out.println("<LobbyPanel> Protocol.IMAGE");
 			appendImage(pt);
 			break;
-		case Protocol.FILE:
+		case Protocol.LOBBY_CHAT_FILE:
 			System.out.println("<LobbyPanel> Protocol.FILE");
 			appendFileInfo(pt);
 			break;
-		case Protocol.FILESEND:
+		case Protocol.LOBBY_CHAT_FILESEND:
 			System.out.println("<LobbyPanel> Protocol.FILESEND");
 			String saveFolder = receiveFilePath; // 경로
 			File targetDir = new File(saveFolder);
@@ -560,68 +560,187 @@ public class LobbyPanel extends ReceiveJPanel {
 			cymNet.receiveFile(receiveFilePath, pt.getSendFileName(), pt.getSendFileSize());
 
 			break;
-		case Protocol.UPDATE_GAME_LIST:
+		case Protocol.LOBBY_UPDATE_GAME_LIST:
 			System.out.println("<LobbyPanel> Protocol.UPDATE_GAME_LIST");
 			updateLobbyGame(pt.getGameList());
-		case Protocol.UPDATE_USER_LIST:
+			break;
+		case Protocol.LOBBY_UPDATE_USER_LIST:
 			System.out.println("<LobbyPanel> Protocol.UPDATE_USER_LIST");
 			updateLobbyUser(pt.getUserList());
+			break;
+		case Protocol.LOBBY_CREATE_ROOM_FAIL:
+			System.out.println("<LobbyPanel> Protocol.CREATE_ROOM_FAIL");
+			JOptionPane.showMessageDialog(cymFrame.getContentPane(), "Game name duplicated.\n Try another one!");
+			break;
+		case Protocol.LOBBY_CREATE_ROOM_SUCCESS:
+			System.out.println("<LobbyPanel> Protocol.CREATE_ROOM_SUCCESS");
+			ChattingPane.setText("");
+			cymFrame.sequenceControl("roomPanel", 0);
+			closeCreateDialog();
+
+			// 프로토콜 전송
+			// Protocol pt = new Protocol();
+			// pt.setStatus(Protocol.LOGOUT);
+			// cymNet.sendProtocol(pt);
+			break;
 		}
 	}
-}
 
-/** 프로필 클릭 이벤트에 대한 내부 클래스 */
-class MyProfileClickListener extends MouseAdapter {
-	private ImageIcon profileImg;
-	private String id;
-	private String charName;
-	private int level;
-
-	public MyProfileClickListener(Protocol pt) {
-		UserInfo userInfo = pt.getUserInfo();
-
-		this.profileImg = new ImageIcon(userInfo.getMyProfileImagePath());
-		this.id = userInfo.getMyNickname();
-		this.charName = userInfo.getMyCharName();
-		this.level = userInfo.getMyLevel();
+	/** 게임 방 생성 다이얼로그를 숨긴다. */
+	public void closeCreateDialog() {
+		createDialog.setVisible(false);
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		new ProfileDialog(profileImg, id, charName, level);
+	/** 게임 방 생성 버튼 클릭 이벤트에 대한 내부 클래스 */
+	class CreateDialog extends JPanel {
+		// for Connect to its parent panel
+		LobbyPanel lp;
+
+		// for inner panels
+		JPanel southPanel;
+		JLabel message;
+		JTextField roomNameTextField;
+		JButton createButton, exitButton;
+
+		/** CreateDialog Construction */
+		public CreateDialog(LobbyPanel lp) {
+			this.lp = lp;
+			setPanel();
+			setEvent();
+		}
+
+		/** for GUI */
+		private void setPanel() {
+			this.setLayout(new BorderLayout());
+			// Inform user to enter the game name
+			message = new JLabel("Enter the name of game room.");
+			message.setPreferredSize(new Dimension(200, 30));
+			message.setBackground(new Color(242, 242, 242));
+			message.setOpaque(true);
+			message.setFont(new Font(CYMFrame.FONT, Font.BOLD, 20));
+			message.setHorizontalAlignment(JLabel.CENTER);
+			message.setVerticalAlignment(JLabel.CENTER);
+			this.add(BorderLayout.NORTH, message);
+
+			// Textfield for user to type game name
+			roomNameTextField = new JTextField();
+			roomNameTextField.setPreferredSize(new Dimension(200, 60));
+			roomNameTextField.setFont(new Font(null, Font.BOLD, 30));
+			roomNameTextField.setBorder(new LineBorder(new Color(255, 206, 5), 4));
+			this.add(BorderLayout.CENTER, roomNameTextField);
+
+			// South panel for buttons
+			southPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+			southPanel.setPreferredSize(new Dimension(150, 50));
+			southPanel.setBackground(new Color(242, 242, 242));
+			createButton = new JButton(new ImageIcon(CYMFrame.ImagePath + "createUp.png"));
+			createButton.setPreferredSize(new Dimension(100, 37));
+			exitButton = new JButton(new ImageIcon(CYMFrame.ImagePath + "backUp.png"));
+			exitButton.setPreferredSize(new Dimension(100, 37));
+			southPanel.add(createButton);
+			southPanel.add(exitButton);
+			this.add(BorderLayout.SOUTH, southPanel);
+		}
+
+		/** for Event */
+		private void setEvent() {
+			// room name TextField 이벤트
+			roomNameTextField.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (roomNameTextField.getText().equals(""))
+						JOptionPane.showMessageDialog(CreateDialog.this.lp.cymFrame.getContentPane(),
+								"Please enter room name.");
+					else {
+						Protocol pt = new Protocol();
+						pt.setStatus(Protocol.LOBBY_CREATE_ROOM);
+						pt.setRoomName(roomNameTextField.getText()); // room 이름
+																		// 설정
+						CreateDialog.this.lp.cymNet.sendProtocol(pt);
+						roomNameTextField.setText("");
+					}
+				}
+			});
+
+			// create button 이벤트
+			createButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					if (roomNameTextField.getText().equals(""))
+						JOptionPane.showMessageDialog(CreateDialog.this.lp.cymFrame.getContentPane(),
+								"Please enter room name.");
+					else {
+						Protocol pt = new Protocol();
+						pt.setStatus(Protocol.LOBBY_CREATE_ROOM);
+						pt.setRoomName(roomNameTextField.getText()); // room이름설정
+						CreateDialog.this.lp.cymNet.sendProtocol(pt);
+						roomNameTextField.setText("");
+					}
+				}
+			});
+
+			// exit button 이벤트
+			exitButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					roomNameTextField.setText("");
+					CreateDialog.this.lp.closeCreateDialog();
+				}
+			});
+		}
 	}
-}
 
-/** 이미지 클릭 이벤트에 대한 내부 클래스 */
-class MyImageClickListener extends MouseAdapter {
-	private ImageIcon imageIcon;
+	/** 프로필 클릭 이벤트에 대한 클래스 */
+	class MyProfileClickListener extends MouseAdapter {
+		private ImageIcon profileImg;
+		private String id;
+		private String charName;
+		private int level;
 
-	public MyImageClickListener(ImageIcon imageIcon) {
-		this.imageIcon = imageIcon;
+		public MyProfileClickListener(Protocol pt) {
+			UserInfo userInfo = pt.getUserInfo();
+
+			this.profileImg = new ImageIcon(userInfo.getMyProfileImagePath());
+			this.id = userInfo.getMyNickname();
+			this.charName = userInfo.getMyCharName();
+			this.level = userInfo.getMyLevel();
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			new ProfileDialog(profileImg, id, charName, level);
+		}
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		new OriginalImageDialog(imageIcon);
-	}
-}
+	/** 이미지 클릭 이벤트에 대한 클래스 */
+	class MyImageClickListener extends MouseAdapter {
+		private ImageIcon imageIcon;
 
-/** 저장 버튼 클릭 이벤트에 대한 내부 클래스 */
-class MyFileSavaBtnClickListener extends MouseAdapter {
-	private CYMNet cymNet;
-	private String fileName;
+		public MyImageClickListener(ImageIcon imageIcon) {
+			this.imageIcon = imageIcon;
+		}
 
-	public MyFileSavaBtnClickListener(CYMNet cymNet, String fileName) {
-		this.cymNet = cymNet;
-		this.fileName = fileName;
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			new OriginalImageDialog(imageIcon);
+		}
 	}
 
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// 프로토콜 전송
-		Protocol pt = new Protocol();
-		pt.setStatus(Protocol.FILESAVE);
-		pt.setSendFileName(fileName);
-		cymNet.sendProtocol(pt);
+	/** 저장 버튼 클릭 이벤트에 대한 클래스 */
+	class MyFileSavaBtnClickListener extends MouseAdapter {
+		private CYMNet cymNet;
+		private String fileName;
+
+		public MyFileSavaBtnClickListener(CYMNet cymNet, String fileName) {
+			this.cymNet = cymNet;
+			this.fileName = fileName;
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			// 프로토콜 전송
+			Protocol pt = new Protocol();
+			pt.setStatus(Protocol.LOBBY_CHAT_FILESAVE);
+			pt.setSendFileName(fileName);
+			cymNet.sendProtocol(pt);
+		}
 	}
+
 }

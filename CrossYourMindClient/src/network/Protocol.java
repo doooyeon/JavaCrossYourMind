@@ -7,17 +7,20 @@ import info.UserInfo;
 
 public class Protocol implements Serializable {
 	// in homePanel
-	public static final int LOGIN = 101;
-	public static final int SUCCESSLOGIN = 102;
+	public static final int HOME_LOGIN = 101;
+	public static final int HOME_SUCCESSLOGIN = 102;
 
 	// in LobbyPanel
-	public static final int MSG = 201;
-	public static final int IMAGE = 202;
-	public static final int FILE = 203;
-	public static final int FILESEND = 204;
-	public static final int FILESAVE = 205;
-	public static final int UPDATE_GAME_LIST = 206;
-	public static final int UPDATE_USER_LIST = 207;
+	public static final int LOBBY_CHAT_MSG = 201;
+	public static final int LOBBY_CHAT_IMAGE = 202;
+	public static final int LOBBY_CHAT_FILE = 203;
+	public static final int LOBBY_CHAT_FILESEND = 204;
+	public static final int LOBBY_CHAT_FILESAVE = 205;
+	public static final int LOBBY_UPDATE_GAME_LIST = 206;
+	public static final int LOBBY_UPDATE_USER_LIST = 207;
+	public static final int LOBBY_CREATE_ROOM = 208;
+	public static final int LOBBY_CREATE_ROOM_FAIL = 209;
+	public static final int LOBBY_CREATE_ROOM_SUCCESS = 210;
 
 	// in gamePanel
 
@@ -41,6 +44,7 @@ public class Protocol implements Serializable {
 
 	// for roominfo
 	private int roomSize;
+	private String roomName;
 	private Vector<UserInfo> usersInRoom;
 
 	/** Protocol construction */
@@ -105,6 +109,21 @@ public class Protocol implements Serializable {
 		return userList;
 	}
 
+	public String getRoomName() {
+		System.out.println("<Protocol> getRoomName: " + roomName);
+		return roomName;
+	}
+
+	public Vector<UserInfo> getUsersInRoom() {
+		System.out.print("<Protocol> getUsersInRoom: ");
+		for (int i = 0; i < usersInRoom.size(); i++) {
+			System.out.print(usersInRoom.get(i).getMyNickname() + " | ");
+		}
+		System.out.println();
+
+		return usersInRoom;
+	}
+
 	/* setter */
 	public void setStatus(int status) {
 		System.out.println("<Protocol> setStatus: " + status);
@@ -154,4 +173,13 @@ public class Protocol implements Serializable {
 		this.userList = userList;
 	}
 
+	public void setRoomName(String roomName) {
+		System.out.print("<Protocol> setRoomName: " + roomName);
+		this.roomName = roomName;
+	}
+
+	public void setUsersInRoom(Vector<UserInfo> usersInRoom) {
+		System.out.print("<Protocol> setUsersInRoom: ");
+		this.usersInRoom = usersInRoom;
+	}
 }
