@@ -3,6 +3,9 @@ package info;
 import java.io.Serializable;
 
 public class UserInfo implements Serializable {
+	public static final int QUESTRIONER_INROOM = 701;
+	public static final int ANSWERER_INROOM = 702;
+	
 	// for userInfo
 	private String[] charName = { "Spiderman", "Batman", "Captain America", "Shrek", "Ironman" };
 	private String myNickname;
@@ -15,6 +18,7 @@ public class UserInfo implements Serializable {
 	private String myGameCharImagePath;
 
 	// for game
+	private int status;
 	private String myRoomName;
 	private int myScore;
 	private boolean isMaster; // 방의 주인장
@@ -88,6 +92,11 @@ public class UserInfo implements Serializable {
 		System.out.println("<UserInfo> getMyGameCharImagePath: " + myGameCharImagePath);
 		return myGameCharImagePath;
 	}
+	
+	public int getStatus() {
+		System.out.println("<UserInfo> getStatus: " + status);
+		return status;
+	}
 
 	public String getMyRoomName() {
 		System.out.println("<UserInfo> getMyRoomName: " + myRoomName);
@@ -135,6 +144,11 @@ public class UserInfo implements Serializable {
 		myProfileImagePath = frontImagePath + "F.png";
 		myGameCharImagePath = frontImagePath + "H.png";
 
+	}
+	
+	public void setStatus(int status){
+		System.out.println("<UserInfo> setStatus: " + status);
+		this.status = status;
 	}
 
 	public void setMyRoomName(String myRoomName) {

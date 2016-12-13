@@ -14,6 +14,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -28,7 +30,8 @@ public class ClientManager extends Thread {
 	};
 
 	private String receiveFilePath = "C:/Program Files/CrossYourMindServer";
-
+	private static final int ROUND_NUM = 4; // 총 진행 라운드
+	private static final ArrayList<String> wordList = new ArrayList<String>();
 	// for connection
 	private Server server;
 	private InputStream is;
@@ -42,14 +45,15 @@ public class ClientManager extends Thread {
 	private Socket user_socket;
 
 	// for
-	private RoomInfo room = null;
-	private UserInfo userInfo;
-	private Vector<ClientManager> users;
-	private int playerNo;
+	private UserInfo userInfo; //나의 정보
+	private RoomInfo room = null; //내가 속해있는 방의 정보
+	private Vector<ClientManager> users; //같은 방에 있는 사용자의 정보
+	private int playerNo; //접속자수
 
 	// for
 	private NETSTATE netState = NETSTATE.Home;
 	private Object readObject;
+	
 
 	/** ClientManager Construction */
 	public ClientManager(Socket soc, Vector<ClientManager> vc, int playerNo, Server server) { // 생성자메소드
@@ -62,6 +66,7 @@ public class ClientManager extends Thread {
 		this.userInfo = new UserInfo();
 
 		UserNetwork();
+		initWordList();
 	}
 
 	/** 스트림 생성 메소드 */
@@ -81,6 +86,20 @@ public class ClientManager extends Thread {
 		}
 	}
 
+	/** 단어 리스트 초기화 메소드 */
+	public void initWordList(){
+		wordList.add("엑소");
+		wordList.add("귓속말");
+		wordList.add("세차장");
+		
+	}
+	
+	/** 단어 리스트에서 랜덤으로 선택하는 메소드 */
+	public String getRandomWord(){
+		Random random = new Random();
+		return wordList.get(random.nextInt(wordList.size()));
+	}
+	
 	/** Protocol 클라이언트로 Protocol을 송신하는 메소드 */
 	public void sendProtocol(Protocol pt) {
 		try {
@@ -170,8 +189,6 @@ public class ClientManager extends Thread {
 				readObject = ois.readObject();
 				Protocol pt = (Protocol) readObject;
 
-				// Protocol ptSendToClient = new Protocol();
-
 				server.textArea.append("프로토콜 수신 번호 : " + pt.getStatus() + "\n");
 				switch (pt.getStatus()) {
 
@@ -239,12 +256,17 @@ public class ClientManager extends Thread {
 						updateUserListInLobby(); // UserList업데이트
 					}
 					break;
+				case Protocol.LOBBY_LOGOUT:
+					System.out.println("<ClientManager> Protocol.LOBBY_LOGOUT");
+					netState = NETSTATE.Home;
+					
+					//처리!!
+					break;
 				case Protocol.GAME_IN:
 					System.out.println("<ClientManager> Protocol.GAME_IN");
 					pt.setStatus(Protocol.GAME_CREATED);
-					pt.setUsersInRoom(room.getUsersInfo()); // 방에 있는 Client의
-															// UserInfo
-															// Vector
+					// 방에 있는 Client의 UserInfo Vector
+					pt.setUsersInRoom(room.getUsersInfo());
 					sendProtocol(pt);
 					System.out.println("<ClientManager> send GAME_CREATED");
 
@@ -260,8 +282,8 @@ public class ClientManager extends Thread {
 						userInfo.setIsMaster(false); // 주인장 X
 
 						// roomName = null?
-						server.addUserToRoom(this, pt.getRoomName()); // Client를
-																		// 방에 추가
+						// Client를 방에 추가
+						server.addUserToRoom(this, pt.getRoomName());
 
 						pt.setStatus(Protocol.LOBBY_JOIN_ROOM_SUCCESS);
 						sendProtocol(pt);
@@ -289,12 +311,68 @@ public class ClientManager extends Thread {
 
 					updateUserListInLobby(); // UserList업데이트
 					break;
-				case Protocol.LOGOUT:
-					System.out.println("<ClientManager> Protocol.LOGOUT");
-					netState = NETSTATE.Home;
+				case Protocol.GAME_CHAT_MSG:
+					System.out.println("<ClientManager> Protocol.GAME_CHAT_MSG");
+					String answeredNickName = userInfo.getMyNickname();
+
+					// round answer과 일치하면
+					if (room.getRoundAnswer().equals(pt.getChatSentence())) {
+						// 해당하는 룸에 있는 참가자들에게 답을 맞춘것을 알린다.
+						for (ClientManager userInRoom : room.getUsersClientManager()) {
+							if (userInRoom.getUserInfo().getMyNickname().equals(answeredNickName)) {
+								// 정답자의 점수 ++
+								userInRoom.getUserInfo().increaseScore();
+							}
+							pt.setStatus(Protocol.GAME_CORRECT_ANSWER);
+							pt.setUserInfo(userInfo);
+							userInRoom.sendProtocol(pt);
+						}
+					}
+					// round answer과 일치하지 않으면
+					else {
+						// 해당하는 룸에 있는 참가자들에게 채팅 내용을 알린다.
+						for (ClientManager userInRoom : room.getUsersClientManager()) {
+							pt.setStatus(Protocol.GAME_CHAT_UPDATE);
+							pt.setUserInfo(userInfo);
+							userInRoom.sendProtocol(pt);
+						}
+					}
 					break;
-				}
-			} catch (IOException e) {
+				case Protocol.GAME_START:
+					System.out.println("<ClientManager> Protocol.GAME_START");
+
+					// 게임 시작을 누른 사람이 주인장이면
+					if (userInfo.getIsMaster()) {
+						// 최소 게임 인원 = 2
+						if (room.getUsersCount() >= 2) {
+							gameStart(pt); // 게임시작성공 프로토콜 전송
+						} else {
+							pt.setStatus(Protocol.GAME_START_FAIL_LACK_USER);
+						}
+					}
+					// 게임 시작 권한(주인장)이 없음
+					else {
+						pt.setStatus(Protocol.GAME_START_FAIL_NOT_MASTER);
+					}
+					sendProtocol(pt);
+					break;
+				case Protocol.GAME_LOGOUT:
+					System.out.println("<ClientManager> Protocol.GAME_LOGOUT");
+					netState = NETSTATE.Lobby;
+					//처리!!!
+					
+					break;
+					
+					
+					
+				case Protocol.EXIT:
+					System.out.println("<ClientManager> Protocol.EXIT");
+					//처리!!!
+					
+					break;
+				} // switch문 끝
+			} // try문 끝
+			catch (IOException e) {
 				try {
 					if (netState == NETSTATE.Room) {
 						// userExitInRoom();
@@ -383,7 +461,7 @@ public class ClientManager extends Thread {
 	}
 
 	/** Protocol broadCasting */
-	void broadCastProtocol(Protocol pt) {
+	public void broadCastProtocol(Protocol pt) {
 		for (int i = 0; i < users.size(); i++) {
 			ClientManager imsi = users.elementAt(i);
 			// Lobby에 있는 client에게만 전송
@@ -394,10 +472,51 @@ public class ClientManager extends Thread {
 	}
 
 	/** IMAGE 이미지 broadCasting */
-	void broadCastImage(String str) {
+	public void broadCastImage(String str) {
 		for (int i = 0; i < users.size(); i++) {
 			ClientManager imsi = users.elementAt(i);
 			imsi.sendImage(str);
+		}
+	}
+
+	/** 게임을 시작하는 메소드 */
+	public void gameStart(Protocol pt) {
+		System.out.println("<ClientManager> call gameStart");
+
+		room.setRoomStatus(RoomInfo.ROOM_PLAYING);
+		room.setRoundNum(RoomInfo.ROOM_ROUND_NUM);
+
+		// 해당하는 룸에 있는 참가자들에게 게임 시작을 알린다.
+		for (ClientManager userInRoom : room.getUsersClientManager()) {
+			UserInfo userInfoInRoom = userInRoom.getUserInfo();
+			try {
+				// // 방에 있는 Client의 UserInfo Vector
+				// pt.setUsersInRoom(room.getUsersInfo());
+
+				// 만약 주인장이면
+				if (userInfoInRoom.getIsMaster()) {
+					userInfoInRoom.setStatus(UserInfo.QUESTRIONER_INROOM);
+					pt.setUserInfo(userInfoInRoom); //질문자 세팅
+					//pt.setStatus(Protocol.GAME_START_SUCCESS_QUESTIONER);
+
+					// 게임 정보 설정
+					room.setRoundNum(ROUND_NUM - 1); // 시작 시 round--
+					room.setRoundAnswer(getRandomWord()); // 정답단어 랜덤 세팅
+					pt.setRoundAnswer(room.getRoundAnswer()); // 프로토콜에 정답저장
+				}
+				// 주인장이 아니면
+				else {
+					userInfoInRoom.setStatus(UserInfo.ANSWERER_INROOM);
+					pt.getUserInfo().setMyNickname(""); //질문자 이름을 세팅
+					//pt.setStatus(Protocol.GAME_START_SUCCESS_ANSWER);
+				}
+				// 프로토콜 전송
+				pt.setStatus(Protocol.GAME_START_SUCCESS);
+				userInRoom.sendProtocol(pt);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

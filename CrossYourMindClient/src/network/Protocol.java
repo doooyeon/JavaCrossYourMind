@@ -1,6 +1,8 @@
 package network;
 
+import java.awt.Point;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import info.UserInfo;
@@ -9,6 +11,8 @@ public class Protocol implements Serializable {
 	// in homePanel
 	public static final int HOME_LOGIN = 101;
 	public static final int HOME_SUCCESSLOGIN = 102;
+
+	public static final int HOME_LOGOUT = 199;
 
 	// in LobbyPanel
 	public static final int LOBBY_CHAT_MSG = 201;
@@ -25,15 +29,36 @@ public class Protocol implements Serializable {
 	public static final int LOBBY_JOIN_ROOM_FAIL = 212;
 	public static final int LOBBY_JOIN_ROOM_SUCCESS = 213;
 
+	public static final int LOBBY_LOGOUT = 299;
+
 	// in gamePanel
 	public static final int GAME_IN = 301;
 	public static final int GAME_CREATED = 302;
-	public static final int GAME_JOIN_IN = 302;
-	public static final int GAME_JOIN_PARTIPANT = 303;
+	public static final int GAME_JOIN_IN = 303;
+	public static final int GAME_JOIN_PARTIPANT = 304;
+	public static final int GAME_CHAT_MSG = 305;
+	public static final int GAME_CORRECT_ANSWER = 307;
+	public static final int GAME_CHAT_UPDATE = 308;
+	public static final int GAME_START = 309;
+	public static final int GAME_START_FAIL_LACK_USER = 310;
+	public static final int GAME_START_FAIL_NOT_MASTER = 311;
+	public static final int GAME_START_SUCCESS = 323;
+	public static final int GAME_START_SUCCESS_QUESTIONER = 321;
+	public static final int GAME_START_SUCCESS_ANSWER = 322;
+	public static final int GAME_DRAW = 312;
+	public static final int GAME_DRAW_ALLCLEAR = 313;
+	public static final int GAME_DRAW_ALLCLEAR_BROADCAST = 314;
+	public static final int GAME_DRAW_ERASER = 315;
+	public static final int GAME_DRAW_ERASER_BROADCAST = 316;
+	public static final int GAME_DRAW_SELECT_COLOR = 317;
+	public static final int GAME_DRAW_SELECT_COLOR_BROADCAST = 318;
+	public static final int GAME_DRAW_TIMER_EXPIRE = 319;
+	public static final int GAME_DRAW_TIMER_EXPIRE_BROADCAST = 320;
 
-	public static final int START = 401;
-	public static final int EXIT = 402;
-	public static final int LOGOUT = 403;
+	public static final int GAME_LOGOUT = 399;
+
+	// public static final int START = 401;
+	public static final int EXIT = 402; // 윈도우창닫기
 
 	/* FIELD */
 	private int status = 0;
@@ -45,7 +70,7 @@ public class Protocol implements Serializable {
 	private long sendFileSize;
 
 	// for chatting
-	private String lobbyChatSentence;
+	private String chatSentence;
 	private Vector<String> gameList;
 	private Vector<String> userList;
 
@@ -53,6 +78,13 @@ public class Protocol implements Serializable {
 	private int roomSize;
 	private String roomName;
 	private Vector<UserInfo> usersInRoom;
+
+	// for game
+	private String roundAnswer;
+
+	// for drawing
+	private int drawColor;
+	private ArrayList<Point> pointList;
 
 	/** Protocol construction */
 	public Protocol() {
@@ -67,7 +99,7 @@ public class Protocol implements Serializable {
 	}
 
 	public UserInfo getUserInfo() {
-		System.out.println("<Protocol> getUserInfo: " + userInfo);
+		System.out.println("<Protocol> getUserInfo(name): " + userInfo.getMyNickname());
 		return userInfo;
 	}
 
@@ -86,9 +118,9 @@ public class Protocol implements Serializable {
 		return sendFileSize;
 	}
 
-	public String getLobbyCharSentence() {
-		System.out.println("<Protocol> getLobbyCharSentence: " + lobbyChatSentence);
-		return lobbyChatSentence;
+	public String getChatSentence() {
+		System.out.println("<Protocol> getChatSentence: " + chatSentence);
+		return chatSentence;
 	}
 
 	public int getRoomSize() {
@@ -131,6 +163,21 @@ public class Protocol implements Serializable {
 		return usersInRoom;
 	}
 
+	public String getRoundAnswer() {
+		System.out.print("<Protocol> getRoundAnswer: " + roundAnswer);
+		return roundAnswer;
+	}
+
+	public int getDrawColor() {
+		System.out.println("<Protocol> getDrawColor: " + drawColor);
+		return drawColor;
+	}
+
+	public ArrayList<Point> getPointList() {
+		System.out.println("<Protocol> getPointList");
+		return pointList;
+	}
+
 	/* setter */
 	public void setStatus(int status) {
 		System.out.println("<Protocol> setStatus: " + status);
@@ -138,7 +185,7 @@ public class Protocol implements Serializable {
 	}
 
 	public void setUserInfo(UserInfo userInfo) {
-		System.out.println("<Protocol> setUserInfo: " + userInfo);
+		System.out.println("<Protocol> setUserInfo(name): " + userInfo.getMyNickname());
 		this.userInfo = userInfo;
 	}
 
@@ -152,9 +199,9 @@ public class Protocol implements Serializable {
 		this.sendFileSize = sendFileSize;
 	}
 
-	public void setLobbyChatSentence(String lobbyChatSentence) {
-		System.out.println("<Protocol> setLobbyChatSentence: " + lobbyChatSentence);
-		this.lobbyChatSentence = lobbyChatSentence;
+	public void setChatSentence(String chatSentence) {
+		System.out.println("<Protocol> setLobbyChatSentence: " + chatSentence);
+		this.chatSentence = chatSentence;
 	}
 
 	public void setRoomSize(int roomSize) {
@@ -181,12 +228,27 @@ public class Protocol implements Serializable {
 	}
 
 	public void setRoomName(String roomName) {
-		System.out.print("<Protocol> setRoomName: " + roomName);
+		System.out.println("<Protocol> setRoomName: " + roomName);
 		this.roomName = roomName;
 	}
 
 	public void setUsersInRoom(Vector<UserInfo> usersInRoom) {
-		System.out.print("<Protocol> setUsersInRoom: ");
+		System.out.println("<Protocol> setUsersInRoom");
 		this.usersInRoom = usersInRoom;
+	}
+
+	public void setRoundAnswer(String roundAnswer) {
+		System.out.println("<Protocol> setRoundAnswer: " + roundAnswer);
+		this.roundAnswer = roundAnswer;
+	}
+
+	public void setDrawColor(int drawColor) {
+		System.out.println("<Protocol> setDrawColor: " + drawColor);
+		this.drawColor = drawColor;
+	}
+
+	public void setPointList(ArrayList<Point> pointList) {
+		System.out.println("<Protocol> setPointList");
+		this.pointList = pointList;
 	}
 }

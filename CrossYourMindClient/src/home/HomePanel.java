@@ -26,6 +26,7 @@ import superPanel.ReceiveJPanel;
 
 public class HomePanel extends ReceiveJPanel {
 
+	// for network
 	private CYMNet cymNet;
 	private CYMFrame cymFrame;
 	private UserInfo userInfo;
@@ -164,6 +165,22 @@ public class HomePanel extends ReceiveJPanel {
 				CH[i].setIcon(charImages.get(i));
 		}
 	}
+	
+	/** 서버로부터 Protocol을 수신받는 오버라이딩 메서드 */
+	@Override
+	public void receiveProtocol(Protocol pt) {
+		int status = pt.getStatus();
+		System.out.println("<HomePanel> receiveProtocol status: " + status);
+
+		switch (status) {
+		case Protocol.HOME_SUCCESSLOGIN:
+			System.out.println("<HomePanel> Protocol.HOME_SUCCESSLOGIN");
+			userInfo = pt.getUserInfo();
+			// cymFrame.sequenceControl("lobbyPanel", arg0);
+			cymFrame.sequenceControl("lobbyPanel", 0);
+			break;
+		}
+	}
 
 	/** 로그인 이벤트에 대한 내부 클래스 -> 프로토콜 전송 */
 	class ConnectAction implements ActionListener {
@@ -199,22 +216,6 @@ public class HomePanel extends ReceiveJPanel {
 			System.out.println("<HomePanel> send HOME_LOGIN");
 
 			nickNameTextField.setText("");
-		}
-	}
-
-	/** 서버로부터 Protocol을 수신받는 오버라이딩 메서드 */
-	@Override
-	public void receiveProtocol(Protocol pt) {
-		int status = pt.getStatus();
-		System.out.println("<HomePanel> receiveProtocol status: " + status);
-
-		switch (status) {
-		case Protocol.HOME_SUCCESSLOGIN:
-			System.out.println("<HomePanel> Protocol.HOME_SUCCESSLOGIN");
-			userInfo = pt.getUserInfo();
-			// cymFrame.sequenceControl("lobbyPanel", arg0);
-			cymFrame.sequenceControl("lobbyPanel", 0);
-			break;
 		}
 	}
 }

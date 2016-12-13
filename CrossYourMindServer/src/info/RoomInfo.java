@@ -35,6 +35,16 @@ public class RoomInfo {
 		// update users in same room
 		user.updateAllClientManager(users);
 	}
+	
+	/** user가 Room에서 나감 */
+	public void removeUser(ClientManager user) {
+		users.remove(user);
+		usersInfo.remove(user.getUserInfo());
+		user.setRoom(null);
+
+		// update users in same room
+		user.updateAllClientManager(users);
+	}
 
 	/* getter */
 	public Vector<ClientManager> getUsersClientManager() {

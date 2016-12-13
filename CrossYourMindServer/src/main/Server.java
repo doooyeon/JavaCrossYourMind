@@ -132,14 +132,10 @@ public class Server extends JFrame {
 
 	/** Room Client를 방에 추가하는 메소드 */
 	public void addUserToRoom(ClientManager clientManager, String roomName) {
+		System.out.println("<SERVER> addUserToRoom");
 		for (RoomInfo roomInfo : rooms) {
 			if (roomInfo.getRoomName().equals(roomName)) {
 				roomInfo.addUser(clientManager);
-
-				System.out.println("<>");
-				System.out.println(clientManager.getUserInfo().getMyNickname());
-				System.out.println(clientManager.getUserInfo().getMyLevel());
-				System.out.println(clientManager.getUserInfo().getMyGameCharImagePath());
 			}
 		}
 	}

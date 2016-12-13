@@ -39,12 +39,13 @@ import superPanel.ReceiveJPanel;
 
 public class LobbyPanel extends ReceiveJPanel {
 
+	// for network
 	private CYMNet cymNet;
 	private CYMFrame cymFrame;
 	private UserInfo userInfo;
 
 	private String receiveFilePath = "C:/Program Files/CrossYourMindClient";
-	private String[] gamesLobby, usersLobby;
+	private String[] gameListNamesLobby, userListNamesLobby;
 
 	// For inner panels
 	private JPanel northPanel, centerPanel;
@@ -83,6 +84,7 @@ public class LobbyPanel extends ReceiveJPanel {
 		setEvent();
 	}
 
+	/** 방 생성에 필요한 다이얼로그 초기화 메소드 */
 	public void initCreateDialog() {
 		createDialog = new JDialog();
 		CreateDialog cd = new CreateDialog(this);
@@ -230,7 +232,7 @@ public class LobbyPanel extends ReceiveJPanel {
 					Protocol pt = new Protocol();
 					pt.setStatus(Protocol.LOBBY_CHAT_MSG);
 					pt.setUserInfo(userInfo);
-					pt.setLobbyChatSentence(lobbyChatSentence);
+					pt.setChatSentence(lobbyChatSentence);
 					cymNet.sendProtocol(pt);
 				}
 				lobbyChatTextField.setText("");
@@ -292,7 +294,7 @@ public class LobbyPanel extends ReceiveJPanel {
 				cymFrame.sequenceControl("homePanel", 0);
 				// 프로토콜 전송
 				Protocol pt = new Protocol();
-				pt.setStatus(Protocol.LOGOUT);
+				pt.setStatus(Protocol.LOBBY_LOGOUT);
 				cymNet.sendProtocol(pt);
 			}
 		});
@@ -394,20 +396,20 @@ public class LobbyPanel extends ReceiveJPanel {
 
 	/** Lobby에 표시되는 접속자들을 업데이트하는 메서드 */
 	public void updateLobbyUser(Vector<String> updated) {
-		usersLobby = new String[updated.size()];
+		userListNamesLobby = new String[updated.size()];
 		for (int i = 0; i < updated.size(); i++) {
-			usersLobby[i] = "  " + updated.get(i);
+			userListNamesLobby[i] = "  " + updated.get(i);
 		}
-		userList.setListData(usersLobby);
+		userList.setListData(userListNamesLobby);
 	}
 
 	/** Lobby에 표시되는 게임방 이름들을 업데이트하는 메서드 */
 	public void updateLobbyGame(Vector<String> updated) {
-		gamesLobby = new String[updated.size()];
+		gameListNamesLobby = new String[updated.size()];
 		for (int i = 0; i < updated.size(); i++) {
-			gamesLobby[i] = "  " + updated.get(i);
+			gameListNamesLobby[i] = "  " + updated.get(i);
 		}
-		gameList.setListData(gamesLobby);
+		gameList.setListData(gameListNamesLobby);
 	}
 
 	/** 생성한 방을 추가하는 메서드 */
@@ -469,7 +471,7 @@ public class LobbyPanel extends ReceiveJPanel {
 
 		int offset = doc.getLength();
 		String nickname = "[" + pt.getUserInfo().getMyNickname() + "]";
-		appendString(nickname + " " + pt.getLobbyCharSentence() + "\n");
+		appendString(nickname + " " + pt.getChatSentence() + "\n");
 
 		appendRightMyMsg(nickname, offset);
 	}
