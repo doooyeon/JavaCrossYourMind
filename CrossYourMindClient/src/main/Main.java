@@ -4,4 +4,4 @@ public class Main {
 		System.out.println("<Main> Cross Your Mind Start");
 		CYMFrame cymFrame = new CYMFrame();
 	}
-}
+} 

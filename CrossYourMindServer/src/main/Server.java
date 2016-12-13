@@ -135,6 +135,11 @@ public class Server extends JFrame {
 		for(RoomInfo roomInfo : rooms){
 			if(roomInfo.getRoomName().equals(roomName)){
 				roomInfo.addUser(clientManager);
+				
+				System.out.println("<>");
+				System.out.println(clientManager.getUserInfo().getMyNickname());
+				System.out.println(clientManager.getUserInfo().getMyLevel());
+				System.out.println(clientManager.getUserInfo().getMyGameCharImagePath());
 			}
 		}
 	}

@@ -168,7 +168,7 @@ public class RoomPanel extends ReceiveJPanel  {
 	      centerCanvasPanel.setBorder(new LineBorder(new Color(255, 206, 5), 2));
 	      centerCanvasPanel.add(canvas = new Canvas());
 	      canvas.setBackground(Color.white);
-	      canvas.setBounds(0, 0, 500, 305); // heee?
+	      canvas.setBounds(0, 0, 500, 305); 
 	      canvas.setEnabled(true);
 	      drawingPanel.add(centerToolPanel);
 	      drawingPanel.add(centerCanvasPanel);
@@ -487,18 +487,18 @@ public class RoomPanel extends ReceiveJPanel  {
 	      userScoreLabel[index] = new JLabel();
 	      userScoreLabel[index].setText("SCORE:");
 	      userScoreLabel[index].setBounds(3, 148, 40, 13);
-	      userScoreLabel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+	      userScoreLabel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 11));
 	      userScore[index] = new JLabel();
 	      userScore[index].setText(Integer.toString(usersList.get(index).getMyScore()));
 	      userScore[index].setBounds(45, 148, 15, 13);
-	      userScore[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+	      userScore[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 11));
 	      userLevelLabel[index].setText("LEVEL:");
 	      userLevelLabel[index].setBounds(65, 148, 40, 13);
-	      userLevelLabel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+	      userLevelLabel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 11));
 	      userLevel[index] = new JLabel();
 	      userLevel[index].setText(Integer.toString(usersList.get(index).getMyLevel()));
 	      userLevel[index].setBounds(107, 148, 15, 13);
-	      userLevel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 13));
+	      userLevel[index].setFont(new Font(CYMFrame.FONT, Font.PLAIN, 11));
 
 	      userPanel[index].add(userChat[index]);
 	      userPanel[index].add(userChar[index]);

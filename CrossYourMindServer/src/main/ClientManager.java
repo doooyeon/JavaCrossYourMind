@@ -182,11 +182,10 @@ public class ClientManager extends Thread {
 					sendProtocol(pt);
 					System.out.println("<ClientManager> send SUCCESSLOGIN");
 					netState = NETSTATE.Lobby; // 로비로 이동
-					userInfo.setMyNickname(pt.getUserInfo().getMyNickname());
-
+					
+					userInfo = pt.getUserInfo(); //프로토콜로 받은 사용자 정보 세팅
 					updateGameListInLobby(); // GameList업데이트
 					updateUserListInLobby(); // UserList업데이트
-
 					break;
 				case Protocol.LOBBY_CHAT_MSG:
 					System.out.println("<ClientManager> Protocol.MSG");
@@ -215,15 +214,6 @@ public class ClientManager extends Thread {
 
 					sendFile(sendFile, fileSize);
 					break;
-				// else if (splitMsg[0].equals("/LOGOUT")) {
-				// System.out.println("로그아웃!");
-				// netState = NETSTATE.Home;
-				// }
-				// break;
-				//
-				// case Room:
-				// break;
-				// }
 				case Protocol.LOBBY_CREATE_ROOM:
 					System.out.println("<ClientManager> Protocol.CREATE_ROOM");
 					String roomName = pt.getRoomName(); // 사용자가 입력한 방이름
@@ -233,8 +223,6 @@ public class ClientManager extends Thread {
 						sendProtocol(pt);
 						System.out.println("<ClientManager> send CREATE_ROOM_DENIED");
 					} else {
-						updateGameListInLobby(); // GameList업데이트
-
 						netState = NETSTATE.Room;
 						room = new RoomInfo(roomName); // 새로운 방 생성
 						userInfo.setIsMaster(true); // 주인장으로 표시
@@ -246,6 +234,8 @@ public class ClientManager extends Thread {
 						sendProtocol(pt);
 						System.out.println("<ClientManager> send CREATE_ROOM_SUCCESS");
 
+						updateGameListInLobby(); // GameList업데이트
+						updateUserListInLobby(); // UserList업데이트
 					}
 					break;
 				case Protocol.GAME_IN:
@@ -256,9 +246,11 @@ public class ClientManager extends Thread {
 															// Vector
 					sendProtocol(pt);
 					System.out.println("<ClientManager> send GAME_CREATED");
-
-					updateGameListInLobby(); // GameList업데이트
-					updateUserListInLobby(); // UserList업데이트
+					
+					break;
+				case Protocol.LOGOUT:
+					System.out.println("<ClientManager> Protocol.LOGOUT");
+					netState = NETSTATE.Home;
 					break;
 				}
 			} catch (IOException e) {
